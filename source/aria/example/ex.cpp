@@ -19,20 +19,22 @@ int main (int argc, char** argv) {
 			return 1;
 		}
 	}
-	ArInterpolation interp;
-	ArTime t;
-	ArPose pose;
+
 	robot.runAsync(true);
 	robot.enableMotors();
-
+	robot.lock();
 	robot.setVel(200);
-	
+	robot.unlock();
 
 	while(true) {
-		//ArPose pose  = robot.getPose();
-		t = robot.getLastPacketTime();
-		int a = interp.getPose(t, &pose);
-		ArLog::log(ArLog::Normal, "a = %d \tx = %f \t y = %f\n", a, pose.getX(), pose.getY());
-		pose.log();
+	//while (robot.blockingConnect()){
+		robot.lock();
+		ArPose pose  = robot.getPose();
+		//pose.setX(100);
+		//robot.moveTo(pose);
+		//t = robot.getLastOdometryTime();
+		//int a = interp.getPose(t, &pose);
+		ArLog::log(ArLog::Normal, "x = %f \t y = %f\n", pose.getX(), pose.getY());
+		robot.unlock();
 	} 
 }
