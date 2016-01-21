@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <iostream>
+#include <stdlib.h>
+#include <cv.h>
+#include <cxcore.h>
+#include <highgui.h>
+using namespace std;
+
+int main(int argc, char** argv)
+{
+
+	CvCapture* capture = cvCaptureFromCAM(-1);
+	//IplImage* image = cvQueryFrame(capture);
+	//cvNamedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
+	//cv::imshow( "mywindow", image );
+	//cvSaveImage()
+	char * fileName = "positive_";
+	fileName = new char[50];
+	int i = 0;
+	while(true) {
+
+		char* t; //= new char[5];
+		//itoa (i,t,10);
+		//sprintf(t, "%d", i);
+
+		//cout<<"number = "<<t;
+		 IplImage* frame = cvQueryFrame( capture );
+		 cvShowImage( "mywindow", frame );
+		         // Do not release the frame!
+		         //If ESC key pressed, Key=0x10001B under OpenCV 0.9.7(linux version),
+		         //remove higher bits using AND operator
+		if ( cvWaitKey(10)  == 27 ) {
+			i ++;
+			snprintf(t, sizeof(t), "%d", i);
+			printf("number %s", t);
+			//strcpy(fileName,t);
+			//cout<<""<<fileName;
+			cvSaveImage("abc.jpg", frame);
+		}
+
+	}
+
+	//image->
+   // Release the capture device housekeeping
+   cvReleaseCapture( &capture );
+   cvDestroyWindow( "mywindow" );
+   return 0;
+}

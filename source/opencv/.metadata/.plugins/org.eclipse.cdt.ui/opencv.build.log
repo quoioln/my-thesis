@@ -1,0 +1,43 @@
+21:30:44 **** Incremental Build of configuration Debug for project opencv ****
+make all 
+Building file: ../src/TachMau.cpp
+Invoking: Cross G++ Compiler
+g++ -I/usr/local/include/opencv2 -I"pkg-config --cflags opencv" -I/usr/local/include -I/usr/local/include/opencv -O0 -g3 -p -Wall -fPIC -MMD -MP -MF"src/TachMau.d" -MT"src/TachMau.o" -o "src/TachMau.o" "../src/TachMau.cpp"
+/tmp/ccyO1fYs.o: In function `main':
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:11: undefined reference to `cv::imread(cv::String const&, int)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:22: undefined reference to `cv::split(cv::_InputArray const&, cv::_OutputArray const&)'
+src/subdir.mk:30: recipe for target 'src/TachMau.o' failed
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:25: undefined reference to `cv::calcHist(cv::Mat const*, int, int const*, cv::_InputArray const&, cv::_OutputArray const&, int, int const*, float const**, bool, bool)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:26: undefined reference to `cv::calcHist(cv::Mat const*, int, int const*, cv::_InputArray const&, cv::_OutputArray const&, int, int const*, float const**, bool, bool)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:27: undefined reference to `cv::calcHist(cv::Mat const*, int, int const*, cv::_InputArray const&, cv::_OutputArray const&, int, int const*, float const**, bool, bool)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:35: undefined reference to `cv::normalize(cv::_InputArray const&, cv::_InputOutputArray const&, double, double, int, int, cv::_InputArray const&)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:36: undefined reference to `cv::normalize(cv::_InputArray const&, cv::_InputOutputArray const&, double, double, int, int, cv::_InputArray const&)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:37: undefined reference to `cv::normalize(cv::_InputArray const&, cv::_InputOutputArray const&, double, double, int, int, cv::_InputArray const&)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:40: undefined reference to `cv::line(cv::_InputOutputArray const&, cv::Point_<int>, cv::Point_<int>, cv::Scalar_<double> const&, int, int, int)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:41: undefined reference to `cv::line(cv::_InputOutputArray const&, cv::Point_<int>, cv::Point_<int>, cv::Scalar_<double> const&, int, int, int)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:42: undefined reference to `cv::line(cv::_InputOutputArray const&, cv::Point_<int>, cv::Point_<int>, cv::Scalar_<double> const&, int, int, int)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:45: undefined reference to `cv::namedWindow(cv::String const&, int)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:46: undefined reference to `cv::imshow(cv::String const&, cv::_InputArray const&)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:47: undefined reference to `cv::imshow(cv::String const&, cv::_InputArray const&)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:48: undefined reference to `cv::imshow(cv::String const&, cv::_InputArray const&)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:49: undefined reference to `cv::imshow(cv::String const&, cv::_InputArray const&)'
+/home/quoioln/DATA/study/thesis/my-thesis/source/opencv/opencv/Debug/../src/TachMau.cpp:52: undefined reference to `cv::waitKey(int)'
+/tmp/ccyO1fYs.o: In function `cv::String::String(char const*)':
+/usr/local/include/opencv2/core/cvstd.hpp:625: undefined reference to `cv::String::allocate(unsigned long)'
+/tmp/ccyO1fYs.o: In function `cv::String::~String()':
+/usr/local/include/opencv2/core/cvstd.hpp:667: undefined reference to `cv::String::deallocate()'
+/tmp/ccyO1fYs.o: In function `cv::Mat::Mat(int, int, int, cv::Scalar_<double> const&)':
+/usr/local/include/opencv2/core/mat.inl.hpp:348: undefined reference to `cv::Mat::operator=(cv::Scalar_<double> const&)'
+/tmp/ccyO1fYs.o: In function `cv::Mat::~Mat()':
+/usr/local/include/opencv2/core/mat.inl.hpp:571: undefined reference to `cv::fastFree(void*)'
+/tmp/ccyO1fYs.o: In function `cv::Mat::clone() const':
+/usr/local/include/opencv2/core/mat.inl.hpp:643: undefined reference to `cv::Mat::copyTo(cv::_OutputArray const&) const'
+/tmp/ccyO1fYs.o: In function `cv::Mat::create(int, int, int)':
+/usr/local/include/opencv2/core/mat.inl.hpp:663: undefined reference to `cv::Mat::create(int, int const*, int)'
+/tmp/ccyO1fYs.o: In function `cv::Mat::release()':
+/usr/local/include/opencv2/core/mat.inl.hpp:682: undefined reference to `cv::Mat::deallocate()'
+collect2: error: ld returned 1 exit status
+make: *** [src/TachMau.o] Error 1
+
+21:30:45 Build Finished (took 1s.375ms)
+

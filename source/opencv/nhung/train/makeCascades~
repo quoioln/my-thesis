@@ -1,0 +1,2 @@
+opencv_traincascade -data cascades -vec data/vector.vec -bg negative.txt -npos 6 -nneg 3 -nstages 20 -mem 110 -mode ALL -w 20 -h 20 -nonsysm
+

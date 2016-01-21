@@ -1,0 +1,5 @@
+total 384
+-rwxrwxrwx 1 quoioln quoioln 129187 Th01 20 09:51 Negative_1.jpg
+-rwxrwxrwx 1 quoioln quoioln 128268 Th01 20 09:55 Negative_2.jpg
+-rwxrwxrwx 1 quoioln quoioln 128681 Th01 20 09:55 Negative_3.jpg
+-rw-rw-r-- 1 quoioln quoioln      0 Th01 20 15:07 vv.txt

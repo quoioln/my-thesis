@@ -1,0 +1,11 @@
+#include <cv.h>
+#include <cxcore.h>
+#include <highgui.h>
+int main(int argc, char** argv)
+{
+	CvCapture* capture;
+	capture = cvCaptureFromCAM(-1);
+	IplImage* cvQueryFrame(capture);
+	cvReleaseCapture(&capture);
+
+}
