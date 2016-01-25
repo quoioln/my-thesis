@@ -1,0 +1,17 @@
+/*
+ * justPathPlainningGuiServer.h
+ *
+ *  Created on: Jan 25, 2016
+ *      Author: quoioln
+ */
+
+#ifndef JUSTPATHPLAINNINGGUISERVER_H_
+#define JUSTPATHPLAINNINGGUISERVER_H_
+
+class justPathPlainningGuiServer {
+public:
+	justPathPlainningGuiServer();
+	virtual ~justPathPlainningGuiServer();
+};
+
+#endif /* JUSTPATHPLAINNINGGUISERVER_H_ */

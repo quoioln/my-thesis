@@ -29,33 +29,60 @@ int main (int argc, char** argv) {
 	}
 	
 	ArSonarDevice sonarDev;
-	robot.addRangeDevice(&sonarDev);
 	
-	robot.runAsync(true);
+
+//	robot.runAsync(true);
 	
 	ArMap map("office.map");
 	// set it up to ignore empty file names (otherwise if a configuration omits
 	// the map file, the whole configuration change will fail)
-	map.setIgnoreEmptyFileName(true);
+//	map.setIgnoreEmptyFileName(true);
 	// ignore the case, so that if someone is using MobileEyes or
 	// MobilePlanner from Windows and changes the case on a map name,
 	// it will still work.
-	map.setIgnoreCase(true);
-	
-	ArSonarLocalizationTask locTask(&robot, &sonarDev, &map);
-	ArPathPlanningTask pathPlan(&robot, &sonarDev, &map);
-	locTask.localizeRobotAtHomeBlocking();
-	pathPlan.pathPlanToPose(ArPose(1000, 1000, 0), true, true);
-	ArGlobalFunctor1<ArPose> add(&addGoalDone);// = new ArGlobalFunctor1(&addGoalDone);
-	pathPlan.addGoalDoneCB(&add);
+//	map.setIgnoreCase(true);
+
 
 	robot.runAsync(true);
 	robot.enableMotors();
-	//robot.lock();
-	robot.setVel(200);
-	//robot.unlock();
-	ArPose pose;
-	locTask.forceUpdatePose(pose);
+//	robot.lock();
+	robot.comInt(ArCommands::ENABLE, 1);
+	robot.addRangeDevice(&sonarDev);
+	ArSonarLocalizationTask locTask(&robot, &sonarDev, &map);
+//	ArActionAvoidFront avoidFront("avoid front obstacles");
+//	ArActionGoto gotoPoseAction("goto");
+//	robot.addAction(&gotoPoseAction, 50);
+//	robot.addAction(&avoidFront, 60);
+//	robot.moveTo(ArPose(0,0,0));
+	ArPathPlanningTask pathPlan(&robot, &sonarDev, &map);
+//	locTask.localizeRobotAtHomeBlocking();
+	ArGlobalFunctor1<ArPose> add(&addGoalDone);// = new ArGlobalFunctor1(&addGoalDone);
+	pathPlan.addGoalDoneCB(&add);
+//	ro
+//	ArActionPlanAndMoveToGoal gotoGoal (200, 10, pathPlan, NULL, &sonarDev);
+
+//	pathPlan.runAsync();
+	pathPlan.pathPlanToPose(ArPose(1000, 1000, 0), true, true);
+	pathPlan.startPathPlanToLocalPose(true);
+//	pathPlan.getCurrentGoal()
+//	pathPlan.is
+//	robot.unlock();
+	/*
+	gotoPoseAction.setGoal(ArPose(10000, 15000, 0));
+	while (!gotoPoseAction.haveAchievedGoal()) {
+		robot.lock();
+		printf ("x = %.2f, y = %.2f", robot.getX(), robot.getY());
+		robot.unlock();
+	}
+	*/
+//	robot.lock();
+//	robot.setVel(200);
+//	robot.unlock();
+	while (!pathPlan.endPathPlanToLocalPose(true));
+		//ArUtil::sleep(1000);
+
+//	ArPose pose;
+//	locTask.forceUpdatePose(pose);
 	
 	/*
 	while(true) {

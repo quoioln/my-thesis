@@ -32,8 +32,13 @@ int main (int argc, char** argv) {
 	robot.addRangeDevice(&sonarDev);
 	
 	//robot.runAsync(true);
-	
+	char fileDir[1024];
+	  ArUtil::addDirectories(fileDir, sizeof(fileDir), Aria::getDirectory(),
+				 "examples");
 	ArMap map("office.map");
+//	  ArMap map(fileDir);
+
+
 	// set it up to ignore empty file names (otherwise if a configuration omits
 	// the map file, the whole configuration change will fail)
 	map.setIgnoreEmptyFileName(true);
@@ -43,14 +48,14 @@ int main (int argc, char** argv) {
 	map.setIgnoreCase(true);
 	
 	ArSonarLocalizationTask locTask(&robot, &sonarDev, &map);
-	//ArPathPlanningTask pathPlan(&robot, &sonarDev, &map);
-	locTask.localizeRobotAtHomeBlocking();
+	ArPathPlanningTask pathPlan(&robot, &sonarDev, &map);
+	//locTask.localizeRobotAtHomeBlocking();
 	robot.setVel(200);
 	ArPose pose;
-	locTask.forceUpdatePose(pose);
-	//pathPlan.pathPlanToPose(ArPose(1000, 1000, 0), true, true);
-	//ArGlobalFunctor1<ArPose> add(&addGoalDone);// = new ArGlobalFunctor1(&addGoalDone);
-	//pathPlan.addGoalDoneCB(&add);
+	//locTask.forceUpdatePose(pose);
+	pathPlan.pathPlanToPose(ArPose(1000, 1000, 10000), true, true);
+	ArGlobalFunctor1<ArPose> add(&addGoalDone);// = new ArGlobalFunctor1(&addGoalDone);
+	pathPlan.addGoalDoneCB(&add);
 
 	robot.runAsync(true);
 	robot.enableMotors();

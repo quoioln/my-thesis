@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 
 	CvCapture* capture = cvCaptureFromCAM(-1);
 	//IplImage* image = cvQueryFrame(capture);
-	//cvNamedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
+//	cvNamedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
 	//cv::imshow( "mywindow", image );
 	//cvSaveImage()
 	char * fileName;

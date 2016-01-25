@@ -1,4 +1,3 @@
-positives/Positive_1.jpg 1
 positives/Positive_2.jpg 1 232 102 481 472
 positives/Positive_3.jpg 1 489 129 284 278
 positives/Positive_4.jpg 1 340 200 394 368

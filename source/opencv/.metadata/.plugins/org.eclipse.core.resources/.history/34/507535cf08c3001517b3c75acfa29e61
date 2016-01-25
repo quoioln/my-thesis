@@ -1,0 +1,18 @@
+/*
+ * justPathPlainningGuiServer.cpp
+ *
+ *  Created on: Jan 25, 2016
+ *      Author: quoioln
+ */
+
+#include "justPathPlainningGuiServer.h"
+
+justPathPlainningGuiServer::justPathPlainningGuiServer() {
+	// TODO Auto-generated constructor stub
+
+}
+
+justPathPlainningGuiServer::~justPathPlainningGuiServer() {
+	// TODO Auto-generated destructor stub
+}
+
