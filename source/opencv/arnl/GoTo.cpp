@@ -50,7 +50,7 @@ int main (int argc, char** argv) {
 	robot.comInt(ArCommands::ENABLE, 1);
 	robot.addRangeDevice(&sonarDev);
 //	ArSonarLocalizationTask locTask(&robot, &sonarDev, &map);
-	ArActionGoto gotoPoseAction("goto");
+	ArActionGoto gotoPoseAction("goto", ArPose(0.0, 0.0, 0.0), 200);
 	ArActionAvoidFront avoidFront("avoid front");
 	robot.addAction(&gotoPoseAction, 50);
 	robot.addAction(&avoidFront, 60);
@@ -66,14 +66,14 @@ int main (int argc, char** argv) {
 
 //	robot.unlock();
 	robot.moveTo(ArPose(0,0,0));
-	gotoPoseAction.setGoal(ArPose(3000, -3000, 0));
+	gotoPoseAction.setGoal(ArPose(3000, 0, 0));
 	ArTime start; //timer
 	start.setToNow();//start timer
 //	start.
 	while (!gotoPoseAction.haveAchievedGoal()) {
 
-		if (start.mSecSince() == 4000){
-			ArLog::log(ArLog::Normal ,"time = %e", start.mSecSince());
+		//if (start.mSecSince() == 4000){
+			//ArLog::log(ArLog::Normal ,"time = %e", start.mSecSince());
 //			gotoPoseAction.cancelGoal();
 //			robot.lock();
 
@@ -82,24 +82,39 @@ int main (int argc, char** argv) {
 //			;
 //			gotoPoseAction.
 //			robot.stop();
-			robot.disableMotors();
+			//robot.disableMotors();
 //			robot.lock();
 //			robot.clearDirectMotion();
 //			robot.unlock();
 //			robot.unlock();
-			ArUtil::sleep(4000);
-			robot.enableMotors();
+			ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
+			ArUtil::sleep(2000);
+			//robot.enableMotors();
 //			robot.lock();
 //			robot.addAction(&gotoPoseAction, 50);
 //			gotoPoseAction.setGoal(ArPose(1000, 1000, 0));
 //			robot.unlock();
 //			gotoPoseAction.activate();
-		}
+		//}
+	}
+	gotoPoseAction.setGoal(ArPose(3000, -1000, 0));
+	while(!gotoPoseAction.haveAchievedGoal()) {
+		
+		ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
+		ArUtil::sleep(2000);
+	}
+//		ArUtil::sleep(4000);
+	gotoPoseAction.setGoal(ArPose(0, -1000, 0));
+	while(!gotoPoseAction.haveAchievedGoal()) {
+		
+		ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
+		ArUtil::sleep(2000);
 	}
 	gotoPoseAction.setGoal(ArPose(0, 0, 0));
-	while(!gotoPoseAction.haveAchievedGoal())
+	while(!gotoPoseAction.haveAchievedGoal()) {
 		ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
-//		ArUtil::sleep(4000);
+		ArUtil::sleep(2000);
+	}
 	printf ("OK");
 
 //		robot.
