@@ -98,8 +98,7 @@ main(int argc, char *argv[])
   
   // Set up where we'll look for files
   char fileDir[1024];
-  ArUtil::addDirectories(fileDir, sizeof(fileDir), Aria::getDirectory(), 
-			 "examples");
+  ArUtil::addDirectories(fileDir, sizeof(fileDir), Aria::getDirectory(), "examples");
   ArLog::log(ArLog::Normal, "Installation directory is: %s\nMaps directory is: %s\n", Aria::getDirectory(), fileDir);
   
   // Set up the map, this will look for files in the examples
@@ -153,6 +152,11 @@ main(int argc, char *argv[])
 
 
   // Set up laser using connector (command line arguments, etc.)
+  // The laser object, will be used if we have one
+    ArSick sick;
+
+    // Add the laser to the robot
+    robot.addRangeDevice(&sick);
   simpleConnector.setupLaser(&sick);
 
   // Start the robot thread.

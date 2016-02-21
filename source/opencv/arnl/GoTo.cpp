@@ -46,87 +46,88 @@ int main (int argc, char** argv) {
 	robot.runAsync(true);
 	robot.enableMotors();
 	robot.moveTo(ArPose(0,0,0));
-//	robot.lock();
+	//robot.lock();
 	robot.comInt(ArCommands::ENABLE, 1);
 	robot.addRangeDevice(&sonarDev);
+	//robot.unlock();
 //	ArSonarLocalizationTask locTask(&robot, &sonarDev, &map);
-	ArActionGoto gotoPoseAction("goto");
+	ArActionGoto gotoPoseAction("goto", ArPose(0, 0, 0), 200);
 	ArActionAvoidFront avoidFront("avoid front");
 	robot.addAction(&gotoPoseAction, 50);
 	robot.addAction(&avoidFront, 60);
 
-//	ArPathPlanningTask pathPlan(&robot, &sonarDev, &map);
-//	locTask.localizeRobotAtHomeBlocking();
-//	ArGlobalFunctor1<ArPose> add(&addGoalDone);// = new ArGlobalFunctor1(&addGoalDone);
-//	pathPlan.addGoalDoneCB(&add);
-//	ArActionPlanAndMoveToGoal gotoGoal (200, 10, pathPlan, NULL, &sonarDev);
-
-//	pathPlan.runAsync();
-//	pathPlan.pathPlanToPose(ArPose(1000, 1000, 0), true, true);
-
-//	robot.unlock();
 	robot.moveTo(ArPose(0,0,0));
-	gotoPoseAction.setGoal(ArPose(3000, -3000, 0));
+	gotoPoseAction.setGoal(ArPose(3000, 0, 0));
 	ArTime start; //timer
 	start.setToNow();//start timer
-//	start.
 	while (!gotoPoseAction.haveAchievedGoal()) {
-
-		if (start.mSecSince() == 4000){
-			ArLog::log(ArLog::Normal ,"time = %e", start.mSecSince());
-//			gotoPoseAction.cancelGoal();
-//			robot.lock();
-
-//			robot.setDeltaHeading(-90);
-//			robot.unlock();
-//			;
-//			gotoPoseAction.
-//			robot.stop();
-			robot.disableMotors();
-//			robot.lock();
-//			robot.clearDirectMotion();
-//			robot.unlock();
-//			robot.unlock();
-			ArUtil::sleep(4000);
-			robot.enableMotors();
-//			robot.lock();
-//			robot.addAction(&gotoPoseAction, 50);
-//			gotoPoseAction.setGoal(ArPose(1000, 1000, 0));
-//			robot.unlock();
-//			gotoPoseAction.activate();
-		}
-	}
-	gotoPoseAction.setGoal(ArPose(0, 0, 0));
-	while(!gotoPoseAction.haveAchievedGoal())
 		ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
-//		ArUtil::sleep(4000);
-	printf ("OK");
+	}
+//	robot.disableMotors();
+//	robot.clearDirectMotion();
+//	robot.setVel(0);
 
-//		robot.
-//		robot.lock();
-//		printf ("x = %.2f, y = %.2f", robot.getX(), robot.getY());
-//		robot.unlock();
-//	}
-//	robot.lock();
-//	robot.setVel(200);
-//	robot.unlock();
-	//while (pathPlan.getRunningWithLock())
-		//ArUtil::sleep(1000);
-
-//	ArPose pose;
-//	locTask.forceUpdatePose(pose);
-	
+	int t = 0;
+	robot.deactivateActions();
 	/*
-	while(true) {
-	//while (robot.blockingConnect()){
-		//robot.lock();
-		//ArPose pose  = robot.getPose();
-		//pose.setX(100);
-		//robot.moveTo(pose);
-		//t = robot.getLastOdometryTime();
-		//int a = interp.getPose(t, &pose);
-		ArLog::log(ArLog::Normal, "x = %f \t y = %f\n", pose.getX(), pose.getY());
-		//robot.unlock();
-	} 
-	* */
+	while(t * 30 <= 360) {
+		robot.lock();
+		robot.setDeltaHeading(30);
+		robot.unlock();
+//		while(!robot.isHeadingDone(30));
+		t ++;
+	}
+*/
+	robot.setDeltaHeading(180);
+
+
+	robot.clearDirectMotion();
+//	gotoPoseAction.activate();
+	ArUtil::sleep(2000);
+
+	gotoPoseAction.setGoal(ArPose(3000, -3000, 0));
+	robot.lock();
+	robot.setVel(200);
+	robot.unlock();
+	robot.clearDirectMotion();
+//	gotoPoseAction.activate();
+	while (!gotoPoseAction.haveAchievedGoal()) {
+		robot.lock();
+		ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
+		robot.unlock();
+	}
+/*
+	angel = 30;
+	while(angel <= 360) {
+		robot.setDeltaHeading(angel);
+		angel += 30;
+	}
+*/
+	ArUtil::sleep(2000);
+	
+	gotoPoseAction.setGoal(ArPose(0, -3000, 0));
+	while (!gotoPoseAction.haveAchievedGoal()) {
+		ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
+	}
+/*
+	angel = 30;
+	while(angel <= 360) {
+		robot.setDeltaHeading(angel);
+		angel += 30;
+	}
+*/
+	ArUtil::sleep(2000);
+	gotoPoseAction.setGoal(ArPose(0, 0, 0));
+	while (!gotoPoseAction.haveAchievedGoal()) {
+		ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
+	}
+/*
+	angel = 30;
+	while(angel <= 360) {
+		robot.setDeltaHeading(angel);
+		angel += 30;
+	}
+*/
+	ArUtil::sleep(2000);
+	Aria::shutdown();
 }
