@@ -51,7 +51,11 @@ int main (int argc, char** argv) {
 	robot.addRangeDevice(&sonarDev);
 	//robot.unlock();
 //	ArSonarLocalizationTask locTask(&robot, &sonarDev, &map);
+<<<<<<< HEAD
 	ArActionGoto gotoPoseAction("goto", ArPose(0, 0, 0), 200);
+=======
+	ArActionGoto gotoPoseAction("goto", ArPose(0.0, 0.0, 0.0), 200);
+>>>>>>> 98a40c008d52e635bc0aa2c7493a5d90509ab817
 	ArActionAvoidFront avoidFront("avoid front");
 	robot.addAction(&gotoPoseAction, 50);
 	robot.addAction(&avoidFront, 60);
@@ -67,6 +71,7 @@ int main (int argc, char** argv) {
 //	robot.clearDirectMotion();
 //	robot.setVel(0);
 
+<<<<<<< HEAD
 	int t = 0;
 	robot.deactivateActions();
 	/*
@@ -79,6 +84,52 @@ int main (int argc, char** argv) {
 	}
 */
 	robot.setDeltaHeading(180);
+=======
+		//if (start.mSecSince() == 4000){
+			//ArLog::log(ArLog::Normal ,"time = %e", start.mSecSince());
+//			gotoPoseAction.cancelGoal();
+//			robot.lock();
+
+//			robot.setDeltaHeading(-90);
+//			robot.unlock();
+//			;
+//			gotoPoseAction.
+//			robot.stop();
+			//robot.disableMotors();
+//			robot.lock();
+//			robot.clearDirectMotion();
+//			robot.unlock();
+//			robot.unlock();
+			ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
+			ArUtil::sleep(2000);
+			//robot.enableMotors();
+//			robot.lock();
+//			robot.addAction(&gotoPoseAction, 50);
+//			gotoPoseAction.setGoal(ArPose(1000, 1000, 0));
+//			robot.unlock();
+//			gotoPoseAction.activate();
+		//}
+	}
+	gotoPoseAction.setGoal(ArPose(3000, -1000, 0));
+	while(!gotoPoseAction.haveAchievedGoal()) {
+		
+		ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
+		ArUtil::sleep(2000);
+	}
+//		ArUtil::sleep(4000);
+	gotoPoseAction.setGoal(ArPose(0, -1000, 0));
+	while(!gotoPoseAction.haveAchievedGoal()) {
+		
+		ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
+		ArUtil::sleep(2000);
+	}
+	gotoPoseAction.setGoal(ArPose(0, 0, 0));
+	while(!gotoPoseAction.haveAchievedGoal()) {
+		ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", robot.getX(), robot.getY());
+		ArUtil::sleep(2000);
+	}
+	printf ("OK");
+>>>>>>> 98a40c008d52e635bc0aa2c7493a5d90509ab817
 
 
 	robot.clearDirectMotion();
