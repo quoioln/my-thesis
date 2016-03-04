@@ -5,7 +5,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
-#include <opencv.hpp>
+//#include <opencv.hpp>
 #include <opencv2/core/types_c.h>
 #include <opencv2/objdetect.hpp>
 #include <opencv2/opencv.hpp>
@@ -16,25 +16,24 @@ using namespace std;
 
 int main(int argc, char** argv)
     {
-	CommandLineParser parser(argc, argv, "");
-			string cascadeName = parser.get<string>(0);
-		   //CvCapture* capture = cvCaptureFromCAM(-1);
-		   VideoCapture cap;
-		   cap.open(0);
-		   /*
-		   if ( !cap ) {
-			 fprintf( stderr, "ERROR: capture is NULL \n" );
-			 getchar();
-			 return -1;
-		   }
-		   * */
-		   // Create a window in which the captured images will be presented
-		   cvNamedWindow("mywindow", CV_WINDOW_FULLSCREEN );
-		   // Show the image captured from the camera in the window and repeat
-		   CascadeClassifier c;
-//			c.load("cascade.xml");
-		   c.load(cascadeName);
-
+//	CommandLineParser parser(argc, argv, "");
+//		string cascadeName = parser.get<string>(1);
+	   //CvCapture* capture = cvCaptureFromCAM(-1);
+	   VideoCapture cap;
+	   cap.open(0);
+	   /*
+	   if ( !cap ) {
+		 fprintf( stderr, "ERROR: capture is NULL \n" );
+		 getchar();
+		 return -1;
+	   }
+	   * */
+	   // Create a window in which the captured images will be presented
+	   cvNamedWindow("mywindow", CV_WINDOW_FULLSCREEN );
+	   // Show the image captured from the camera in the window and repeat
+	   CascadeClassifier c;
+			c.load("cascade.xml");
+//	   c.load(cascadeName);
 			Mat frame1;
 			Mat frame2;
 		   while ( 1 ) {
@@ -48,15 +47,15 @@ int main(int argc, char** argv)
 			 }
 			 * */
 			 //Mat frame1 = cvarrToMat(frame);
-			 cap >> frame2;
-			 
+			 cap >> frame1;
+/*
 			 if( frame2.empty() )
                 break;
              //frame1.copyTo(frame2);   
              
 			 cvtColor( frame2, frame1, COLOR_BGR2GRAY );
 			 equalizeHist( frame1, frame1);
-			
+*/
 				 std::vector<cv::Rect> ball;
 				 c.detectMultiScale(frame1, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
 				 cout <<"size = "<<ball.size()<<endl;
