@@ -4,20 +4,15 @@ using namespace std;
 
 class GotoGoal {
 private:
-	ArRobot robot;
-	ArSonarDevice sonarDev;
+	ArRobot* myRobot;
+	ArSonarDevice* sonarDev;
 	ArActionAvoidFront avoidFrontAction;
 	ArActionGoto gotoGoalAction;
-//	ArPose* poseList;
 public:
-	GotoGoal();
+	GotoGoal(ArRobot* myRobot, ArSonarDevice* sonar);
 	void init(int argc, char **argv);
 	void stop();
 	ArPose getPose();
-//	void addAction(ArAction action, int prioty);
-//	bool disableAction(ArAction action);
-//	bool enbleAction(ArAction action);
-//	ArPose* readPostitions(char* fileName);
 	void gotoGoal(ArPose pose);
 	void rotate(float angle);
 	void setVel(float vel);

@@ -114,7 +114,6 @@ int main( int argc, const char** argv )
     cout << hot_keys;
     namedWindow( "Histogram", 0 );
     namedWindow( "CamShift Demo", 0 );
-    setMouseCallback( "CamShift Demo", onMouse, 0 );
     createTrackbar( "Vmin", "CamShift Demo", &vmin, 256, 0 );
     createTrackbar( "Vmax", "CamShift Demo", &vmax, 256, 0 );
     createTrackbar( "Smin", "CamShift Demo", &smin, 256, 0 );
@@ -146,25 +145,29 @@ int main( int argc, const char** argv )
 				 std::vector<cv::Rect> ball;
 				 c.detectMultiScale(frame, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
 				 cout <<"size = "<<ball.size()<<endl;
-				 for(std::vector<cv::Rect>::const_iterator r = ball.begin(); r < ball.end(); r++)
-				 {
+				 if (ball.size() == 1){
+//				 for(std::vector<cv::Rect>::const_iterator r = ball.begin(); r < ball.end(); r++)
+//				 {
+					 Rect r = ball.front();
 					 cv::Point center;
-					 center.x = r->x + (int)r->width/2;
-					 center.y = r->y + (int)r->height/2;
-					 cv::ellipse(frame, center, cv::Size(r->width/2, r->height/2), 0, 0, 360, Scalar(0, 255, 0), 4, 8, 0);
-					 selection.x = r->x;
-					 selection.y = r->y;
-					 selection.width = r->x + (int)r->width;
-					 selection.height = r->x + (int)r->width;
+					 center.x = r.x + (int)r.width/2;
+					 center.y = r.y + (int)r.height/2;
+					 cv::ellipse(frame, center, cv::Size(r.width/2, r.height/2), 0, 0, 360, Scalar(0, 255, 0), 4, 8, 0);
+					 selection.x = r.x;
+					 selection.y = r.y;
+					 selection.width = r.x + (int)r.width;
+					 selection.height = r.y + (int)r.height;
 	//				 selection.y = MIN(y, origin.y);
 	//				 selection.width = std::abs(x - origin.x);
 	//				 selection.height = std::abs(y - origin.y);
 
 					 selection &= Rect(0, 0, image.cols, image.rows);
 	//				 selection = r;
-				 }
-				 if (ball.size() > 0)
 					 checkObject = true;
+				 }
+//				 if (ball.size() > 0)
+//					 checkObject = true;
+
 			 } else {
 
 //			 while (1){
@@ -224,19 +227,28 @@ int main( int argc, const char** argv )
 						cvtColor( backproj, image, COLOR_GRAY2BGR );
 //					trackWindow.
 //					trackBox.
-					if (image.size > 0)
+//					float width = trackWindow.size().width;
+//					float height = trackWindow.size().height;
+					float width = trackBox.size.width;
+					float height = trackBox.size.height;
+
+				if (abs(width - height) <= 20 && width > 20 && height > 20) {
+//					if (image.size > 0)
 						ellipse( image, trackBox, Scalar(0,0,255), 3, LINE_AA );
-					else
-						checkObject = false;
+//					else
+
 //				}
-				if( selectObject && selection.width > 0 && selection.height > 0 )
-				{
-					Mat roi(image, selection);
-					bitwise_not(roi, roi);
-				}
+//				if( selectObject && selection.width > 0 && selection.height > 0 )
+//				{
+//					Mat roi(image, selection);
+//					bitwise_not(roi, roi);
+//				}
 //				if (trackObject >=0)
 					imshow( "threshold", mask );
-				imshow( "Histogram", histimg );
+					imshow( "Histogram", histimg );
+				} else {
+					checkObject = false;
+				}
 			}
 //			 }
 

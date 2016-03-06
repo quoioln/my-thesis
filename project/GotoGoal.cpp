@@ -6,39 +6,26 @@
 using namespace std;
 
 
-GotoGoal::GotoGoal(){
-};
+GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar){
+	this->myRobot = robot;
+	this->sonarDev = sonar;
+//	robot = ArRobot();
+//	sonarDev = ArSonarDevice();
+}
 void GotoGoal::init(int argc, char **argv){
-	Aria::init();
-//	ArArgumentParser parser(&argc, argv);
-	ArArgumentParser parser(&argc, argv);
-	parser.loadDefaultArguments();
-	ArRobotConnector robotConnector(&parser, &robot);
-	if (!robotConnector.connectRobot()) {
-		ArLog::log(ArLog::Terse, "Could not connect to the robot.");
-		if(parser.checkHelpAndWarnUnparsed())
-		{
-			Aria::logOptions();
-			Aria::exit(1);
-//			return 1;
-		}
-	}
-	robot.runAsync(true);
-	robot.enableMotors();
-//	robot.moveTo(ArPose(0,0,0));
-	robot.comInt(ArCommands::ENABLE, 1);
-	robot.addRangeDevice(&sonarDev);
+	myRobot->runAsync(true);
+
+	myRobot->moveTo(ArPose(0,0,0));
+	myRobot->comInt(ArCommands::ENABLE, 1);
+	myRobot->addRangeDevice(sonarDev);
 	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 200);
-	avoidFrontAction = ArActionAvoidFront("avoid front");
-//	goStraightAction = ArActionGotoStraight("go straight", ArPose(0, 0, 0), 200);
-	robot.addAction(&gotoGoalAction, 50);
-	robot.addAction(&avoidFrontAction, 60);
-//	robot.addAction(&goStraightAction, 40);
-//	goStraightAction.deactivate();
+	myRobot->addAction(&gotoGoalAction, 50);
+
+	myRobot->enableMotors();
 };
 void GotoGoal::stop(){
-	robot.stop();
-	robot.setVel(0);
+	myRobot->stop();
+	myRobot->setVel(0);
 };
 /*
 bool GotoGoal::disableAction(ArAction action){
@@ -64,33 +51,33 @@ void GotoGoal::gotoGoal(ArPose pose){
 	gotoGoalAction.setGoal(pose);
 };
 void GotoGoal::rotate(float angle){
-	robot.lock();
-	robot.setDeltaHeading(angle);
-	robot.unlock();
-//	while(!robot.isHeadingDone());
+	myRobot->lock();
+	myRobot->setDeltaHeading(angle);
+	myRobot->unlock();
+//	while(!myRobot->isHeadingDone());
 };
 void GotoGoal::setVel(float vel){
-	robot.lock();
-	robot.setVel(vel);
-	robot.unlock();
+	myRobot->lock();
+	myRobot->setVel(vel);
+	myRobot->unlock();
 };
 bool GotoGoal::haveAchievedGoal(){
 	return gotoGoalAction.haveAchievedGoal();
 };
 bool GotoGoal::haveRotated(){
-	return robot.isHeadingDone();
+	return myRobot->isHeadingDone();
 };
 void GotoGoal::enableDirectionCommand(){
 	gotoGoalAction.deactivate();
 	avoidFrontAction.deactivate();
 };
 void GotoGoal::disableDirectionCommand(){
-	robot.clearDirectMotion();
+	myRobot->clearDirectMotion();
 	gotoGoalAction.activate();
 	avoidFrontAction.activate();
 };
 ArPose GotoGoal::getPose(){
-	return robot.getPose();
+	return myRobot->getPose();
 }
 void GotoGoal::shutdown(){
 	Aria::shutdown();
@@ -119,8 +106,24 @@ ArPose* readPostitions(char* fileName){
 	is.close();
 	return postitionList;
 }
+/*
 int main(int argc, char **argv) {
-	GotoGoal gotoGoal;
+	Aria::init();
+	ArRobot robot;
+	ArSonarDevice sonar;
+	ArArgumentParser parser(&argc, argv);
+	parser.loadDefaultArguments();
+	ArRobotConnector robotConnector(&parser, &robot);
+	if (!robotConnector.connectRobot()) {
+		ArLog::log(ArLog::Terse, "Could not connect to the robot.");
+		if(parser.checkHelpAndWarnUnparsed())
+		{
+			Aria::logOptions();
+			Aria::exit(1);
+		}
+	}
+
+	GotoGoal gotoGoal(&robot, &sonar);
 	gotoGoal.init(argc, argv);
 	ArPose* poseList = readPostitions("positions.txt");
 	int length = ARRAY_SIZE(poseList);
@@ -131,18 +134,19 @@ int main(int argc, char **argv) {
 		while (!gotoGoal.haveAchievedGoal()) {
 			ArPose pose = gotoGoal.getPose();
 			ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", pose.getX(), pose.getY());
-			ArUtil::sleep(200);
+			ArUtil::sleep(50);
 		}
-		/*
+
 		int t = 1;
 		gotoGoal.enableDirectionCommand();
-		while(t * 30 <= 360) {
-			gotoGoal.rotate(30);
+		while(t * 90 <= 360) {
+			gotoGoal.rotate(90);
 			while(!gotoGoal.haveRotated());
 			t++;
 		}
 		gotoGoal.disableDirectionCommand();
-		*/
+
 	}
 	gotoGoal.shutdown();
 }
+*/
