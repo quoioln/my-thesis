@@ -30,7 +30,10 @@ Tracking::Tracking(){
 	smin = 30;
 //	trackBox = NULL;
 };
-
+Mat Tracking::readFrame(){
+	cap >> frame;
+	return frame;
+};
 int Tracking::init(){
 	cap.open(0);
 	if(!cap.isOpened()){
@@ -47,7 +50,7 @@ int Tracking::loadCascade(){
 };
 bool Tracking::detect(){
 	 Mat image;
-	 cap >> frame;
+//	 cap >> frame;
 	 frame.copyTo(image);
 	 vector<Rect> ball;
 	 c.detectMultiScale(image, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
@@ -301,8 +304,14 @@ int main(int argc, char **argv) {
 	gotoGoal.enableDirectionCommand();
 
 	float angle = 0;
+	namedWindow( "main", 0 );
 	while(true) {
+
+		Mat frame = tracking.readFrame();
+		tracking.showFrame("main", frame);
 		checkObject = tracking.detect();
+
+//		tracking.s
 		if (checkObject){
 			gotoGoal.setVel(200);
 			if(tracking.trackObject()) {
@@ -313,6 +322,7 @@ int main(int argc, char **argv) {
 		} else {
 			gotoGoal.stop();
 		}
+
 	}
 	gotoGoal.shutdown();
 }

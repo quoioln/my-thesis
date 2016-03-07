@@ -30,8 +30,10 @@ private:
 	int vmax;
 	int smin;
 	RotatedRect trackBox;
+//	Mat hsv, mask;
 public:
 	Tracking();
+	Mat readFrame();
 	int init();
 	int loadCascade();
 	bool detect();
