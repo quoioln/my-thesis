@@ -25,9 +25,12 @@ using namespace std;
 
 Tracking::Tracking(){
 	delta = 80;
-	vmin = 162;
+//	vmin = 162;
+//	vmax = 256;
+//	smin = 153;
+	vmin = 77;
 	vmax = 256;
-	smin = 153;
+	smin = 130;
 //	trackBox = NULL;
 };
 Mat Tracking::readFrame(){
@@ -108,6 +111,9 @@ bool Tracking::trackObject(){
 	if (abs(width - height) >  delta)// || width < 10 || height < 10)
 		return false;
 	ellipse( image, trackBox, Scalar(0,0,255), 3, LINE_AA );
+	long  x = trackBox.center.x;
+
+	cout << "x = " << x <<endl;
 	return true;
 };
 void Tracking::trackbar(string nameWindow)
@@ -120,7 +126,7 @@ void Tracking::trackbar(string nameWindow)
 void Tracking::showFrame()
 {
 	imshow( "threshold", mask );
-	//	imshow( "Histogram", histimg );
+//		imshow( "Histogram", histimg );
 	imshow( "main", image );
 };
 void Tracking::setFrame() {
@@ -129,10 +135,12 @@ void Tracking::setFrame() {
 	namedWindow( "Histogram", 0 );
 }
 void Tracking::inRange() {
-	Mat image;
+//	Mat image;
+	frame.copyTo(image);
 	cvtColor(image, hsv, COLOR_BGR2HSV);
 	int _vmin = vmin, _vmax = vmax;
 	cv::inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)), Scalar(180, 256, MAX(_vmin, _vmax)), mask);
+//	ims
 }
 float Tracking::distance()
 {
@@ -182,13 +190,13 @@ void GotoGoal::init(int argc, char **argv){
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->enableMotors();
 	myRobot->lock();
-	myRobot->setRotAccel(1000);
+	myRobot->setRotAccel(5000);
 	myRobot->unlock();
 };
 void GotoGoal::stop(){
 	myRobot->lock();
 	myRobot->stop();
-	myRobot->setVel(0);
+//	myRobot->setVel(0);
 	myRobot->unlock();
 };
 /*
@@ -327,35 +335,44 @@ int main(int argc, char **argv) {
 //	namedWindow( "main", 0 );
 //	namedWindow( "threshold", 0 );
 //	namedWindow( "Histogram", 0 );
-	tracking.setFrame();
+//	tracking.setFrame();
 	while(true) {
 
-		Mat frame = tracking.readFrame();
+		tracking.readFrame();
 //		tracking.showFrame("main", frame);
 		tracking.inRange();
 		checkObject = tracking.detect();
 		if (checkObject){
 //			gotoGoal.setVel(200);
 			if(tracking.trackObject()) {
-				gotoGoal.enableDirectionCommand();
+
 				long distance = tracking.distance();
 
-				float vel = distance * 0.5;
-				if (vel > 200)
-					vel = 200;
+				float vel = distance;
+				vel = (int) (vel/50) * 50;
+				if (vel > 500)
+					vel = 500;
 
-
+//				cout << "van to"
 				angle =  tracking.determindRotate();
-				cout <<"khoang cach: "<<distance<<"\tGoc quay: "<<angle<<endl;
+				gotoGoal.setVel(vel);
+				cout <<"khoang cach: "<<distance<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
 				if (angle != 0) {
-					gotoGoal.setVel(0);
+//					gotoGoal.enableDirectionCommand();
+//					gotoGoal.setVel(0);
+					gotoGoal.stop();
 					gotoGoal.rotate(angle);
+					while(!gotoGoal.haveRotated());
+					gotoGoal.disableDirectionCommand();
 				}
-				else
+				/*
+				else {
+//					gotoGoal.enableDirectionCommand();
 					gotoGoal.setVel(vel);
+				}
+*/
 
-				while(!gotoGoal.haveRotated());
-				gotoGoal.disableDirectionCommand();
+
 			} else {
 				checkObject = false;
 				cout<< "Bat sai"<<endl;
