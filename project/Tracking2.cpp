@@ -24,10 +24,10 @@ using namespace cv;
 using namespace std;
 
 Tracking::Tracking(){
-	delta = 20;
-	vmin = 10;
+	delta = 80;
+	vmin = 162;
 	vmax = 256;
-	smin = 30;
+	smin = 153;
 //	trackBox = NULL;
 };
 Mat Tracking::readFrame(){
@@ -54,7 +54,7 @@ bool Tracking::detect(){
 	 frame.copyTo(image);
 	 vector<Rect> ball;
 	 c.detectMultiScale(image, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
-	 cout <<"size = "<<ball.size()<<endl;
+//	 cout <<"size = "<<ball.size()<<endl;
 	 int sizeball = ball.size();
 	 if (sizeball != 1)
 		 return false;
@@ -73,12 +73,9 @@ bool Tracking::trackObject(){
     float hranges[] = {0,180};
     const float* phranges = hranges;
     Rect trackWindow;
-	Mat hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
-	Mat image;
-	frame.copyTo(image);
-	cvtColor(image, hsv, COLOR_BGR2HSV);
-	int _vmin = vmin, _vmax = vmax;
-	inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)), Scalar(180, 256, MAX(_vmin, _vmax)), mask);
+	Mat hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
+
+
 	int ch[] = {0, 0};
 	hue.create(hsv.size(), hsv.depth());
 	mixChannels(&hsv, 1, &hue, 1, ch, 1);
@@ -108,12 +105,9 @@ bool Tracking::trackObject(){
 	TermCriteria( TermCriteria::EPS | TermCriteria::COUNT, 10, 1 ));
 	float width = trackBox.size.width;
 	float height = trackBox.size.height;
-	if (abs(width - height) >  delta || width < 20 || height < 20)
+	if (abs(width - height) >  delta)// || width < 10 || height < 10)
 		return false;
 	ellipse( image, trackBox, Scalar(0,0,255), 3, LINE_AA );
-	imshow( "threshold", mask );
-	imshow( "Histogram", histimg );
-	imshow( "main", image );
 	return true;
 };
 void Tracking::trackbar(string nameWindow)
@@ -123,32 +117,53 @@ void Tracking::trackbar(string nameWindow)
 	createTrackbar( "Vmax", nameWindow, &vmax, 256, 0 );
 	createTrackbar( "Smin", nameWindow, &smin, 256, 0 );
 }
-void Tracking::showFrame(string nameWindow, Mat frame)
+void Tracking::showFrame()
 {
-	imshow( nameWindow, frame );
+	imshow( "threshold", mask );
+	//	imshow( "Histogram", histimg );
+	imshow( "main", image );
 };
-long Tracking::distance()
+void Tracking::setFrame() {
+	namedWindow( "main", 0 );
+	namedWindow( "threshold", 0 );
+	namedWindow( "Histogram", 0 );
+}
+void Tracking::inRange() {
+	Mat image;
+	cvtColor(image, hsv, COLOR_BGR2HSV);
+	int _vmin = vmin, _vmax = vmax;
+	cv::inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)), Scalar(180, 256, MAX(_vmin, _vmax)), mask);
+}
+float Tracking::distance()
 {
 	float width = trackBox.size.width;
 	float height = trackBox.size.height;
 	float sizeImage = (width > height ? width : height);
-	float z = (513 * 0.0264583333333334)/sizeImage;
+	float z = (135.7648799 * 105)/(sizeImage * 0.264583333333334);
 	return z;
 }
 float Tracking::determindRotate() {
 //	float width = trackBox.size.width;
 //	float height = trackBox.size.height;
 	long  x = trackBox.center.x;
-	if (x <= 140)
-		return 60;
-	else if (x <= 280)
-		return 30;
-	else if (x <= 360)
+
+	cout << "x = " << x <<endl;
+//	if (x <= 110)
+//		return -60;
+//	else if (x <= 220)
+//		return -30;
+//	else if (x <= 400)
+//		return 0;
+//	else if (x <= 510)
+//		return 30;
+//	else
+//		return 60;
+	if (x <= 200)
+		return -40;
+	else if (x <= 440)
 		return 0;
-	else if (x <= 500)
-		return -30;
 	else
-		return -60;
+		return 40;
 }
 
 GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar){
@@ -165,8 +180,10 @@ void GotoGoal::init(int argc, char **argv){
 	myRobot->addRangeDevice(sonarDev);
 	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 200);
 	myRobot->addAction(&gotoGoalAction, 50);
-
 	myRobot->enableMotors();
+	myRobot->lock();
+	myRobot->setRotAccel(1000);
+	myRobot->unlock();
 };
 void GotoGoal::stop(){
 	myRobot->lock();
@@ -178,7 +195,7 @@ void GotoGoal::stop(){
 bool GotoGoal::disableAction(ArAction action){
 	bool checked = false;
 	return checked;
-};
+}; quoi khung
 bool GotoGoal::enbleAction(ArAction action){
 	bool checked = false;
 	return checked;
@@ -198,9 +215,12 @@ void GotoGoal::gotoGoal(ArPose pose){
 	gotoGoalAction.setGoal(pose);
 };
 void GotoGoal::rotate(float angle){
+
 	myRobot->lock();
+	//myRobot->setRotAccel()
 	myRobot->setDeltaHeading(angle);
 	myRobot->unlock();
+	ArLog::log(ArLog::Normal, "RotAccel = %f",myRobot->getRotAccel());
 //	while(!myRobot->isHeadingDone());
 };
 void GotoGoal::setVel(float vel){
@@ -276,7 +296,7 @@ int main(int argc, char **argv) {
 	Tracking tracking;
 	tracking.init();
 	tracking.loadCascade();
-	tracking.trackbar("Trackbar");
+//	tracking.trackbar("Trackbar");
 	/*
 	ArPose* poseList = readPostitions("positions.txt");
 	int length = ARRAY_SIZE(poseList);
@@ -304,24 +324,47 @@ int main(int argc, char **argv) {
 	gotoGoal.enableDirectionCommand();
 
 	float angle = 0;
-	namedWindow( "main", 0 );
+//	namedWindow( "main", 0 );
+//	namedWindow( "threshold", 0 );
+//	namedWindow( "Histogram", 0 );
+	tracking.setFrame();
 	while(true) {
 
 		Mat frame = tracking.readFrame();
-		tracking.showFrame("main", frame);
+//		tracking.showFrame("main", frame);
+		tracking.inRange();
 		checkObject = tracking.detect();
-
-//		tracking.s
 		if (checkObject){
-			gotoGoal.setVel(200);
+//			gotoGoal.setVel(200);
 			if(tracking.trackObject()) {
+				gotoGoal.enableDirectionCommand();
+				long distance = tracking.distance();
+
+				float vel = distance * 0.5;
+				if (vel > 200)
+					vel = 200;
+
+
 				angle =  tracking.determindRotate();
-				gotoGoal.rotate(angle);
+				cout <<"khoang cach: "<<distance<<"\tGoc quay: "<<angle<<endl;
+				if (angle != 0) {
+					gotoGoal.setVel(0);
+					gotoGoal.rotate(angle);
+				}
+				else
+					gotoGoal.setVel(vel);
+
 				while(!gotoGoal.haveRotated());
-			} else checkObject = false;
+				gotoGoal.disableDirectionCommand();
+			} else {
+				checkObject = false;
+				cout<< "Bat sai"<<endl;
+			}
 		} else {
 			gotoGoal.stop();
+
 		}
+		tracking.showFrame();
 
 	}
 	gotoGoal.shutdown();

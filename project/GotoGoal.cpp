@@ -1,6 +1,5 @@
 #include "GotoGoal.h"
-#include<iostream>
-#include<fstream>
+//#include "iso"
 #define ARRAY_SIZE(array)(sizeof(array[0])/sizeof(array))
 
 using namespace std;
@@ -82,6 +81,7 @@ ArPose GotoGoal::getPose(){
 void GotoGoal::shutdown(){
 	Aria::shutdown();
 };
+/*
 ArPose* readPostitions(char* fileName){
 	ArPose* postitionList = new ArPose[1000];
 	ArPose pose;
@@ -106,6 +106,7 @@ ArPose* readPostitions(char* fileName){
 	is.close();
 	return postitionList;
 }
+* */
 /*
 int main(int argc, char **argv) {
 	Aria::init();

@@ -1,7 +1,5 @@
 #include "Aria.h"
 
-using namespace std;
-
 class GotoGoal {
 private:
 	ArRobot* myRobot;

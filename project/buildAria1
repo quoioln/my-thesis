@@ -1,0 +1,2 @@
+g++ -fPIC -g -Wall -D_REENTRANT -fno-exceptions -I./ -I/usr/local/include -I/usr/local/Arnl/include -I/usr/local/Arnl/include/Aria -I/usr/local/Arnl/include/ArNetworking -c $1 -L/usr/local/Arnl/lib -lArnl -lBaseArnl -lSonArnl -lAriaForArnl -lArNetworkingForArnl `pkg-config --cflags opencv` -I/usr/opencv-2.4.9/include -lpthread -ldl -lrt `pkg-config --libs opencv` -Xlinker -Bstatic -lstdc++ -Xlinker -Bdynamic
+

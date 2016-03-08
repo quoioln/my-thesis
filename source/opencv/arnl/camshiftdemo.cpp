@@ -229,10 +229,14 @@ int main( int argc, const char** argv )
 //					trackBox.
 //					float width = trackWindow.size().width;
 //					float height = trackWindow.size().height;
+					long  x = trackBox.center.x;
+
+					cout << "x = " << x <<endl;
+
 					float width = trackBox.size.width;
 					float height = trackBox.size.height;
 
-				if (abs(width - height) <= 20 && width > 20 && height > 20) {
+				if (abs(width - height) <= 80 && width > 20 && height > 20) {
 //					if (image.size > 0)
 						ellipse( image, trackBox, Scalar(0,0,255), 3, LINE_AA );
 //					else

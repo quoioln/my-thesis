@@ -30,7 +30,7 @@ private:
 	int vmax;
 	int smin;
 	RotatedRect trackBox;
-//	Mat hsv, mask;
+	Mat hue, mask, image, hsv;
 public:
 	Tracking();
 	Mat readFrame();
@@ -39,7 +39,9 @@ public:
 	bool detect();
 	bool trackObject();
 	void trackbar(std::string nameWindow);
-	void showFrame(std::string nameWindow, Mat frame);
-	long distance();
+	void setFrame();
+	void showFrame();
+	void inRange();
+	float distance();
 	float determindRotate();
 };
