@@ -23,6 +23,7 @@
 #include "opencv2/highgui.hpp"
 
 using namespace std;
+using namespace cv;
 //initial min and max HSV filter values.
 //these will be changed using trackbars
 int H_MIN = 0;

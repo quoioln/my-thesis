@@ -10,6 +10,8 @@ public:
 	GotoGoal(ArRobot* myRobot, ArSonarDevice* sonar);
 	void init(int argc, char **argv);
 	void stop();
+	void lock();
+	void unlock();
 	ArPose getPose();
 	void gotoGoal(ArPose pose);
 	void rotate(float angle);

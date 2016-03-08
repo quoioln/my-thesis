@@ -116,7 +116,7 @@ bool Tracking::trackObject(){
 	cout << "x = " << x <<endl;
 	return true;
 };
-void Tracking::trackbar(string nameWindow)
+void Tracking::trackbar(std::string nameWindow)
 {
 	namedWindow( nameWindow, 0 );
 	createTrackbar( "Vmin", nameWindow, &vmin, 256, 0 );
@@ -127,7 +127,7 @@ void Tracking::showFrame()
 {
 	imshow( "threshold", mask );
 //		imshow( "Histogram", histimg );
-	imshow( "main", image );
+	imshow( "main", frame );
 };
 void Tracking::setFrame() {
 	namedWindow( "main", 0 );
@@ -188,6 +188,7 @@ void GotoGoal::init(int argc, char **argv){
 	myRobot->addRangeDevice(sonarDev);
 	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 200);
 	myRobot->addAction(&gotoGoalAction, 50);
+//	myRobot->setDirectMotionPrecedenceTime(200);
 	myRobot->enableMotors();
 	myRobot->lock();
 	myRobot->setRotAccel(5000);
@@ -196,9 +197,9 @@ void GotoGoal::init(int argc, char **argv){
 void GotoGoal::stop(){
 	myRobot->lock();
 	myRobot->stop();
-//	myRobot->setVel(0);
 	myRobot->unlock();
 };
+
 /*
 bool GotoGoal::disableAction(ArAction action){
 	bool checked = false;
@@ -228,7 +229,7 @@ void GotoGoal::rotate(float angle){
 	//myRobot->setRotAccel()
 	myRobot->setDeltaHeading(angle);
 	myRobot->unlock();
-	ArLog::log(ArLog::Normal, "RotAccel = %f",myRobot->getRotAccel());
+//	ArLog::log(ArLog::Normal, "RotAccel = %f",myRobot->getRotAccel());
 //	while(!myRobot->isHeadingDone());
 };
 void GotoGoal::setVel(float vel){
@@ -248,8 +249,8 @@ void GotoGoal::enableDirectionCommand(){
 };
 void GotoGoal::disableDirectionCommand(){
 	myRobot->clearDirectMotion();
-	gotoGoalAction.activate();
-	avoidFrontAction.activate();
+//	gotoGoalAction.activate();
+//	avoidFrontAction.activate();
 
 
 };
@@ -258,6 +259,12 @@ ArPose GotoGoal::getPose(){
 }
 void GotoGoal::shutdown(){
 	Aria::shutdown();
+};
+void GotoGoal::lock(){
+	myRobot->lock();
+};
+void GotoGoal::unlock(){
+	myRobot->unlock();
 };
 ArPose* readPostitions(char* fileName){
 	ArPose* postitionList = new ArPose[1000];
@@ -337,10 +344,10 @@ int main(int argc, char **argv) {
 //	namedWindow( "main", 0 );
 //	namedWindow( "threshold", 0 );
 //	namedWindow( "Histogram", 0 );
-//	tracking.setFrame();
+	tracking.setFrame();
 	while(true) {
 
-		tracking.readFrame();
+		Mat frame = tracking.readFrame();
 //		tracking.showFrame("main", frame);
 		tracking.inRange();
 		checkObject = tracking.detect();
@@ -360,20 +367,18 @@ int main(int argc, char **argv) {
 				gotoGoal.setVel(vel);
 				cout <<"khoang cach: "<<distance<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
 				if (angle != 0) {
-//					gotoGoal.enableDirectionCommand();
-//					gotoGoal.setVel(0);
 					gotoGoal.stop();
 					gotoGoal.rotate(angle);
+//					gotoGoal.lock();
 					while(!gotoGoal.haveRotated());
+//					gotoGoal.unlock();
 					gotoGoal.disableDirectionCommand();
 				}
-				/*
-				else {
-//					gotoGoal.enableDirectionCommand();
-					gotoGoal.setVel(vel);
-				}
-*/
 
+//				else {
+//					gotoGoal.enableDirectionCommand();
+//					gotoGoal.setVel(vel);
+//				}
 
 			} else {
 				checkObject = false;
@@ -383,6 +388,9 @@ int main(int argc, char **argv) {
 			gotoGoal.stop();
 
 		}
+
+		cout<< "Bat lai doi tuong"<<endl;
+
 		tracking.showFrame();
 
 	}
