@@ -250,6 +250,8 @@ void GotoGoal::disableDirectionCommand(){
 	myRobot->clearDirectMotion();
 	gotoGoalAction.activate();
 	avoidFrontAction.activate();
+
+
 };
 ArPose GotoGoal::getPose(){
 	return myRobot->getPose();
