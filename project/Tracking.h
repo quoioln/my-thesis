@@ -44,4 +44,5 @@ public:
 	void inRange();
 	float distance();
 	float determindRotate();
+	float determindAngle(float x, float y);
 };

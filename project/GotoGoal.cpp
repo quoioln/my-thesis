@@ -13,18 +13,20 @@ GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar){
 }
 void GotoGoal::init(int argc, char **argv){
 	myRobot->runAsync(true);
-
 	myRobot->moveTo(ArPose(0,0,0));
 	myRobot->comInt(ArCommands::ENABLE, 1);
 	myRobot->addRangeDevice(sonarDev);
 	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 200);
+	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 10);
 	myRobot->addAction(&gotoGoalAction, 50);
-
+	myRobot->addAction(&avoidFrontAction, 60);
 	myRobot->enableMotors();
 };
 void GotoGoal::stop(){
+	myRobot->lock();
 	myRobot->stop();
 	myRobot->setVel(0);
+	myRobot->unlock();
 };
 /*
 bool GotoGoal::disableAction(ArAction action){
@@ -53,7 +55,6 @@ void GotoGoal::rotate(float angle){
 	myRobot->lock();
 	myRobot->setDeltaHeading(angle);
 	myRobot->unlock();
-//	while(!myRobot->isHeadingDone());
 };
 void GotoGoal::setVel(float vel){
 	myRobot->lock();

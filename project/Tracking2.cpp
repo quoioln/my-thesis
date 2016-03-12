@@ -151,34 +151,28 @@ float Tracking::distance()
 	return z;
 }
 float Tracking::determindRotate() {
-//	float width = trackBox.size.width;
-//	float height = trackBox.size.height;
 	long  x = trackBox.center.x;
-
-	cout << "x = " << x <<endl;
-//	if (x <= 110)
-//		return -60;
-//	else if (x <= 220)
-//		return -30;
-//	else if (x <= 400)
-//		return 0;
-//	else if (x <= 510)
-//		return 30;
-//	else
-//		return 60;
+	long  y = trackBox.center.y;
+	cout << "x = " << x <<  "\ty = " << y <<endl;
 	if (x <= 200)
-		return -40;
+//		return (0 - determindAngle(x, y));
+		return -20;
 	else if (x <= 440)
 		return 0;
 	else
-		return 40;
+		return 20;
+//		return determindAngle(x, y);
 }
-
+float Tracking::determindAngle(float x, float y) {
+	float deltaX = y - 480;
+	float deltaY = 320 - x;
+	float cosAngle = abs(deltaX) /  sqrt(deltaX * deltaX + deltaY * deltaY);
+	float angle = acos(cosAngle) * 180;
+	return angle;
+}
 GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar){
 	this->myRobot = robot;
 	this->sonarDev = sonar;
-//	robot = ArRobot();
-//	sonarDev = ArSonarDevice();
 }
 void GotoGoal::init(int argc, char **argv){
 	myRobot->runAsync(true);
@@ -187,8 +181,9 @@ void GotoGoal::init(int argc, char **argv){
 	myRobot->comInt(ArCommands::ENABLE, 1);
 	myRobot->addRangeDevice(sonarDev);
 	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 200);
+	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 10);
 	myRobot->addAction(&gotoGoalAction, 50);
-//	myRobot->setDirectMotionPrecedenceTime(200);
+	myRobot->addAction(&avoidFrontAction, 60);
 	myRobot->enableMotors();
 	myRobot->lock();
 	myRobot->setRotAccel(5000);
@@ -197,6 +192,7 @@ void GotoGoal::init(int argc, char **argv){
 void GotoGoal::stop(){
 	myRobot->lock();
 	myRobot->stop();
+	myRobot->setVel(0);
 	myRobot->unlock();
 };
 
@@ -249,9 +245,8 @@ void GotoGoal::enableDirectionCommand(){
 };
 void GotoGoal::disableDirectionCommand(){
 	myRobot->clearDirectMotion();
-//	gotoGoalAction.activate();
-//	avoidFrontAction.activate();
-
+	gotoGoalAction.activate();
+	avoidFrontAction.activate();
 
 };
 ArPose GotoGoal::getPose(){
@@ -346,39 +341,25 @@ int main(int argc, char **argv) {
 //	namedWindow( "Histogram", 0 );
 	tracking.setFrame();
 	while(true) {
-
 		Mat frame = tracking.readFrame();
-//		tracking.showFrame("main", frame);
+
 		tracking.inRange();
-		checkObject = tracking.detect();
+		if (!checkObject)
+			checkObject = tracking.detect();
 		if (checkObject){
-//			gotoGoal.setVel(200);
 			if(tracking.trackObject()) {
-
 				long distance = tracking.distance();
-
 				float vel = distance;
 				vel = (int) (vel/50) * 50;
-				if (vel > 500)
-					vel = 500;
-
-//				cout << "van to"
+				if (vel > 200)
+					vel = 200;
 				angle =  tracking.determindRotate();
 				gotoGoal.setVel(vel);
 				cout <<"khoang cach: "<<distance<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
 				if (angle != 0) {
 					gotoGoal.stop();
 					gotoGoal.rotate(angle);
-//					gotoGoal.lock();
-					while(!gotoGoal.haveRotated());
-//					gotoGoal.unlock();
-					gotoGoal.disableDirectionCommand();
 				}
-
-//				else {
-//					gotoGoal.enableDirectionCommand();
-//					gotoGoal.setVel(vel);
-//				}
 
 			} else {
 				checkObject = false;
@@ -386,13 +367,8 @@ int main(int argc, char **argv) {
 			}
 		} else {
 			gotoGoal.stop();
-
+			cout<< "Bat lai doi tuong"<<endl;
 		}
-
-		cout<< "Bat lai doi tuong"<<endl;
-
-		tracking.showFrame();
-
 	}
 	gotoGoal.shutdown();
 }
