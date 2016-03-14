@@ -30,20 +30,19 @@ private:
 	int vmax;
 	int smin;
 	RotatedRect trackBox;
-	Mat mask, hsv, hue;
+	Mat hue, mask, image, hsv;
 public:
 	Tracking();
+	Mat readFrame();
 	int init();
 	int loadCascade();
 	bool detect();
 	bool trackObject();
 	void trackbar(std::string nameWindow);
-	void showFrame(std::string nameWindow, Mat frame);
+	void setFrame();
+	void showFrame();
+	void inRange();
 	float distance();
 	float determindRotate();
-private:
-	Mat createHSV();
-	Mat readImage();
-
-//	void inRange()
+	float determindAngle(float x, float y);
 };

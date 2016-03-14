@@ -1,4 +1,4 @@
-#include "GotoGoal.h"
+#include "GotoGoal3.h"
 #include <iostream>
 #include <fstream>
 #include "Tracking.h"
@@ -28,7 +28,7 @@
 using namespace cv;
 using namespace std;
 
-const float f = 135.7648799, X = 202, px = 0.264583333333334;
+const float f = 135.7648799, X = 105, px = 0.264583333333334;
 const float maxWidth = 640, maxHeight = 480;
 //#define X 105f
 //#define px 0.264583333333334f
@@ -180,9 +180,12 @@ float Tracking::determindAngle(float x, float y) {
 	float angle = acos(cosAngle) * 180 / M_PI;
 	return angle;
 }
-GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar){
+GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar, ArServerBase* server, ArServerInfoRobot* serverInfo){
 	this->myRobot = robot;
 	this->sonarDev = sonar;
+	this->server = server;
+	this->serverInfo = serverInfo;
+//	this->serverInfo = ArServerInfoRobot(this->server, this->myRobot);
 }
 void GotoGoal::init(int argc, char **argv){
 	myRobot->runAsync(true);
@@ -194,10 +197,13 @@ void GotoGoal::init(int argc, char **argv){
 	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 10);
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->addAction(&avoidFrontAction, 60);
+	server->runAsync();
 	myRobot->enableMotors();
 	myRobot->lock();
 	myRobot->setRotAccel(5000);
+
 	myRobot->unlock();
+
 };
 void GotoGoal::stop(){
 	myRobot->lock();
@@ -311,8 +317,23 @@ int main(int argc, char **argv) {
 			Aria::exit(1);
 		}
 	}
+	ArServerBase server;
+	ArServerSimpleOpener simpleOpener(&parser);
+	char fileDir[1024];
+	  ArUtil::addDirectories(fileDir, sizeof(fileDir), Aria::getDirectory(),
+				 "ArNetworking/examples");
 
-	GotoGoal gotoGoal(&robot, &sonar);
+	  // first open the server up
+	  if (!simpleOpener.open(&server, fileDir, 240))
+	  {
+	    if (simpleOpener.wasUserFileBad())
+	      printf("Bad user/password/permissions file\n");
+	    else
+	      printf("Could not open server port\n");
+	    exit(1);
+	  }
+	ArServerInfoRobot serverInfo(&server, &robot);
+	GotoGoal gotoGoal(&robot, &sonar, &server, &serverInfo);
 	gotoGoal.init(argc, argv);
 //	namedWindow( "main", 0 );
 

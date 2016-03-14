@@ -1,4 +1,4 @@
-#include "GotoGoal3.h"
+#include "GotoGoal.h"
 //#include "iso"
 #define ARRAY_SIZE(array)(sizeof(array[0])/sizeof(array))
 
@@ -20,10 +20,7 @@ void GotoGoal::init(int argc, char **argv){
 	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 10);
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->addAction(&avoidFrontAction, 60);
-
 	myRobot->enableMotors();
-
-
 };
 void GotoGoal::stop(){
 	myRobot->lock();
