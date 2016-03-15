@@ -28,7 +28,7 @@
 using namespace cv;
 using namespace std;
 
-const float f = 135.7648799, X = 105, px = 0.264583333333334;
+const float f = 135.7648799, X = 202, px = 0.264583333333334;
 const float maxWidth = 640, maxHeight = 480;
 //#define X 105f
 //#define px 0.264583333333334f
@@ -57,9 +57,9 @@ int Tracking::init(){
 };
 int Tracking::loadCascade(){
 	if(c.load("cascade.xml"))
-		return 0;
-	else
 		return 1;
+	else
+		return 0;
 };
 bool Tracking::detect(){
 	 Mat image;
@@ -185,6 +185,7 @@ GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar, ArServerBase* server, A
 	this->sonarDev = sonar;
 	this->server = server;
 	this->serverInfo = serverInfo;
+
 //	this->serverInfo = ArServerInfoRobot(this->server, this->myRobot);
 }
 void GotoGoal::init(int argc, char **argv){
@@ -197,6 +198,8 @@ void GotoGoal::init(int argc, char **argv){
 	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 10);
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->addAction(&avoidFrontAction, 60);
+//	myRobot->setDirectMotionPrecedenceTime(1000);
+//	myRobot->
 	server->runAsync();
 	myRobot->enableMotors();
 	myRobot->lock();
@@ -383,7 +386,7 @@ int main(int argc, char **argv) {
 		if (checkObject){
 			if(tracking.trackObject()) {
 				long distance = tracking.distance();
-				if (distance <= 150) {
+				if (distance <= 200) {
 					gotoGoal.stop();
 				} else {
 					vel = distance * 0.7;
