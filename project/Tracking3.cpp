@@ -66,6 +66,11 @@ bool Tracking::detect(){
 	 Mat image;
 //	 cap >> frame;
 	 frame.copyTo(image);
+//	 frame.copyTo(image);
+	 namedWindow( "main", 0 );
+	 cvtColor(image, hsv, COLOR_BGR2HSV);
+	 int _vmin = vmin, _vmax = vmax;
+	 cv::inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)), Scalar(180, 256, MAX(_vmin, _vmax)), mask);
 	 vector<Rect> ball;
 	 c.detectMultiScale(image, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
 //	 cout <<"size = "<<ball.size()<<endl;
@@ -80,6 +85,7 @@ bool Tracking::detect(){
 	 selection.width = r->x + (int)r->width;
 	 selection.height = r->y + (int)r->height;
 	 selection &= Rect(0, 0, image.cols, image.rows);
+	 imshow("main", image);
 	 return true;
 };
 bool Tracking::trackObject(){
@@ -347,7 +353,7 @@ int main(int argc, char **argv) {
 //	namedWindow( "main", 0 );
 
 	Tracking tracking;
-	tracking.setFrame();
+//	tracking.setFrame();
 	tracking.init();
 	tracking.loadCascade();
 //	tracking.trackbar("Trackbar");
@@ -418,7 +424,7 @@ int main(int argc, char **argv) {
 			gotoGoal.stop();
 			cout<< "Bat lai doi tuong"<<endl;
 		}
-		tracking.showFrame();
+//		tracking.showFrame();
 //		imshow("main", frame);
 	}
 	gotoGoal.shutdown();

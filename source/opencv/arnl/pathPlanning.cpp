@@ -104,7 +104,8 @@ main(int argc, char *argv[])
   // You can take out the 'fileDir' argument to look in the current directory
   // instead
 //  ArMap arMap(fileDir);
-  ArMap arMap("office.map");
+  ArMap arMap(".");
+  arMap.readFile("office.map");
   // set it up to ignore empty file names (otherwise the parseFile
   // on the config will fail)
 //  arMap.setIgnoreEmptyFileName(true);

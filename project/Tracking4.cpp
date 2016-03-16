@@ -323,6 +323,7 @@ int main(int argc, char **argv) {
 
 	float angle = 0;
 	VideoCapture cap;
+	cap.open(0);
 	Rect trackWindow;
 	//var check find ball
 	bool checkObject = false;
@@ -330,11 +331,14 @@ int main(int argc, char **argv) {
 //	float hranges[] = {0,180};
 //	const float* phranges = hranges;
 	namedWindow( "threshold", 0 );
+	namedWindow( "trackbar", 0 );
 	namedWindow( "Histogram", 0 );
 	namedWindow( "main", 0 );
-	createTrackbar( "Vmin", "main", &vmin, 256, 0 );
-	createTrackbar( "Vmax", "main", &vmax, 256, 0 );
-	createTrackbar( "Smin", "main", &smin, 256, 0 );
+	createTrackbar( "Vmin", "trackbar", &vmin, 256, 0 );
+	createTrackbar( "Vmax", "trackbar", &vmax, 256, 0 );
+	createTrackbar( "Smin", "trackbar", &smin, 256, 0 );
+//	cvI
+//	imshow("")
 	CascadeClassifier c;
 	c.load("cascade.xml");
 	Mat frame, hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
@@ -385,9 +389,9 @@ int main(int argc, char **argv) {
 		imshow("main", image);
 		imshow( "threshold", mask );
 		imshow( "Histogram", histimg );
-//		char c = (char)waitKey(10);
-//		if( c == 27 )
-//			break;
+		char c = (char)waitKey(10);
+		if( c == 27 )
+			break;
 //		imshow("main", frame);
 	}
 	gotoGoal.shutdown();
