@@ -28,7 +28,7 @@
 using namespace cv;
 using namespace std;
 
-const float f = 135.7648799, X = 105, px = 0.264583333333334;
+const float f = 135.7648799, X = 202, px = 0.264583333333334;
 const float maxWidth = 640, maxHeight = 480;
 //#define X 105f
 //#define px 0.264583333333334f
@@ -118,7 +118,7 @@ bool Tracking::trackObject(){
 	TermCriteria( TermCriteria::EPS | TermCriteria::COUNT, 10, 1 ));
 	float width = trackBox.size.width;
 	float height = trackBox.size.height;
-	if (abs(width - height) >  delta)// || width < 10 || height < 10)
+	if (abs(width - height) >  delta || width < 10 || height < 10)
 		return false;
 	ellipse( image, trackBox, Scalar(0,0,255), 3, LINE_AA );
 	long  x = trackBox.center.x;
@@ -165,13 +165,13 @@ float Tracking::determindRotate() {
 	long  y = trackBox.center.y;
 	cout << "x = " << x <<  "\ty = " << y <<endl;
 	if (x <= 200)
-		return (0 - determindAngle(x, y));
+		return (determindAngle(x, y));
 //		return -20;
 	else if (x <= 440)
 		return 0;
 	else
 //		return 20;
-		return determindAngle(x, y);
+		return (0 - determindAngle(x, y));
 }
 float Tracking::determindAngle(float x, float y) {
 	float deltaX = y - maxHeight;
