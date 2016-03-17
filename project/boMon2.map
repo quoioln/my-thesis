@@ -1,0 +1,60 @@
+2D-Map
+Resolution: 0
+LineMinPos: -4400 -15000
+LineMaxPos: 1600 0
+NumLines: 37
+LinesAreSorted: true
+MapInfo: DockType "Name=Dock" "Label=Dock" "NameRequired=1" "Color0=0xffff00" "Color1=0x000000" "Color2=0x000000" "FtFix=1" "FtSize=12" "Heading=Required"
+MapInfo: GoalType "Name=Goal" "Label=Goal" "NameRequired=1" "Color0=0x008080" "Color1=0x00ffff" "Color2=0x008080" "FtFix=1" "FtSize=12"
+MetaInfo: Rotation "Value=0"
+MetaInfo: Feature "Name=changeprocessing"
+RouteInfo: EveryBefore "_everyBefore"
+RouteInfo: EveryAfter "_everyAfter"
+SchedInfo: Current "_Friday"
+SchedInfo: Current "_Monday"
+SchedInfo: Current "_Saturday"
+SchedInfo: Current "_Sunday"
+SchedInfo: Current "_Thursday"
+SchedInfo: Current "_Tuesday"
+SchedInfo: Current "_Wednesday"
+Cairn: RobotHome 0 0 -90.000000 "" ICON "Door"
+Cairn: ForbiddenLine 8727 -2837 0.000000 "" ICON "" 8727 -2837 8727 -2837
+LINES
+-4400 -15000 1600 -15000
+-4400 -10920 -2830 -10920
+-4400 -10220 -2830 -10220
+-4400 -8680 -2830 -8680
+-4400 -4850 -2000 -4850
+-4400 -3700 -1950 -3700
+-4400 0 -4400 -15000
+-4400 0 -500 0
+-3650 -10920 -3650 -15000
+-2830 -10220 -2830 -10920
+-2830 -9360 -4400 -9360
+-2830 -8680 -2830 -9360
+-2830 -6870 -4400 -6870
+-2830 -6190 -4400 -6190
+-2830 -6190 -2830 -6870
+-2000 -4850 -2000 -4200
+-1950 -4200 -4400 -4200
+-1950 -3700 -1950 -4200
+-200 -11010 1600 -11010
+-200 -10300 -200 -11010
+-200 -10300 1600 -10300
+-200 -9330 1600 -9330
+-200 -8650 -200 -9330
+-200 -8650 1600 -8650
+-200 -6910 1600 -6910
+-200 -6250 -200 -6910
+-200 -6250 1600 -6250
+-200 -4780 1600 -4780
+-200 -4100 -200 -4780
+700 -5680 1600 -5680
+700 -4780 700 -5680
+780 -11010 780 -15000
+1000 -3200 1000 -4100
+1600 -4100 -200 -4100
+1600 -3200 1000 -3200
+1600 0 500 0
+1600 0 1600 -15000
+DATA

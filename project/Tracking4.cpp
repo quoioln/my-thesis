@@ -59,7 +59,9 @@ void GotoGoal::init(int argc, char **argv){
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->addAction(&avoidFrontAction, 60);
 //	myRobot->setDirectMotionPrecedenceTime(1000);
-//	myRobot->
+//	myRobot->setCycleTime(50);
+//	myRobot->setDirectMotionPrecedenceTime()
+	myRobot->setStateReflectionRefreshTime(100);
 	server->runAsync();
 	myRobot->enableMotors();
 	myRobot->lock();
