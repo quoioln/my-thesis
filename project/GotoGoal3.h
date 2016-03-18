@@ -23,4 +23,5 @@ public:
 	void enableDirectionCommand();
 	void disableDirectionCommand();
 	void shutdown();
+	void move(int distance);
 };
