@@ -26,6 +26,7 @@
 								<option id="gnu.cpp.compiler.option.include.paths.1895100964" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/include/opencv2"/>
 									<listOptionValue builtIn="false" value="/usr/local/Arnl/include"/>
+									<listOptionValue builtIn="false" value="/usr/local/Arnl/include"/>
 									<listOptionValue builtIn="false" value="/usr/local/include/opencv"/>
 									<listOptionValue builtIn="false" value="/usr/local/Arnl/include/Aria"/>
 									<listOptionValue builtIn="false" value="/usr/local/Arnl/include/ArNetworking"/>
@@ -42,9 +43,12 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1716345605" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.paths.711887358" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/usr/local/Arnl/lib"/>
+									<listOptionValue builtIn="false" value="/usr/local/Aria/lib"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.365169960" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="AriaForArnl"/>
+									<listOptionValue builtIn="false" value="Arnl"/>
+									<listOptionValue builtIn="false" value="BaseArnl"/>
 									<listOptionValue builtIn="false" value="ArNetworkingForArnl"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.487966774" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">

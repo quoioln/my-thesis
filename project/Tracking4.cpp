@@ -27,7 +27,7 @@
 using namespace cv;
 using namespace std;
 
-const float f = 135.7648799, X = 202, px = 0.264583333333334;
+const float f = 135.7648799, X = 100, px = 0.264583333333334;
 const float maxWidth = 640, maxHeight = 480, delta = 40;
 const float stopDistance = 250;
 Mat image;
@@ -363,7 +363,7 @@ int main(int argc, char **argv) {
 			if(trackObject(hsv, mask)) {
 				float d = distance();
 				if (d <= 300) {
-					gotoGoal.move(-200);
+					gotoGoal.move(d - 250);
 				} else if (d <= 250){
 					gotoGoal.stop();
 				} else {
