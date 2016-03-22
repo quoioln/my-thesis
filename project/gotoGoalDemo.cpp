@@ -78,7 +78,7 @@ int main (int argc, char** argv) {
 	// it will still work.
 //	map.setIgnoreCase(true);
 
-	ArPose* poseList = readPostitions("positions.txt");
+
 
 	robot.runAsync(true);
 	robot.enableMotors();
@@ -107,6 +107,7 @@ int main (int argc, char** argv) {
 //	gotoPoseAction.setGoal(ArPose(3000, 0, 0));
 //	ArTime start; //timer
 //	start.setToNow();//start timer
+	ArPose* poseList = readPostitions("positions.txt");
 	int length = ARRAY_SIZE(poseList);
 	cout <<"size of = "<<sizeof(poseList)<<endl;
 	for (int i = 0; i < 28; i++) {

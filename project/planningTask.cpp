@@ -1,13 +1,14 @@
 #include "Aria.h"
 #include "Arnl.h"
 #include "ArPathPlanningTask.h"
-#include "ArLocalizationTask.h"
+#include "ArSonarLocalizationTask.h"
 int main (int argc, char** argv) {
 	Arnl::init();
 	Aria::init();
 
 	ArRobot robot;
 	ArArgumentParser parser(&argc, argv);
+
 	parser.loadDefaultArguments();
 	ArRobotConnector robotConnector(&parser, &robot);
 	ArAnalogGyro gyro(&robot);
@@ -29,6 +30,8 @@ int main (int argc, char** argv) {
 	robot.addRangeDevice(&sonarDev);
 	robot.addRangeDevice(&bumpers);
 	robot.unlock();
+	parser.loadDefaultArguments();
+
 	ArMap map;
 	map.setIgnoreEmptyFileName(true);
 	ArLog::log(ArLog::Normal, "map name = %s",map.getFileName() );
@@ -53,7 +56,8 @@ int main (int argc, char** argv) {
 	    Aria::exit(1);
 	  }
 	ArPathPlanningTask pathTask(&robot, &sonarDev, &map);
-	ArLocalizationTask locTask(&robot, &sonarDev, &map);
+	ArSonarLocalizationTask locTask(&robot, &sonarDev, &map);
+
 	ArActionPlanAndMoveToGoal action(500, 200, &pathTask, NULL, &sonarDev);
 
 	// Action to slow down robot when localization score drops but not lost.
@@ -67,6 +71,7 @@ int main (int argc, char** argv) {
 	robot.lock();
 	pathTask.addRangeDevice(&bumpers, ArPathPlanningTask::CURRENT);
 	ArForbiddenRangeDevice forbidden(&map);
+//	ArLine
 //	robot.addRangeDevice(&forbidden);
 	pathTask.addRangeDevice(&forbidden, ArPathPlanningTask::CURRENT);
 	ArGlobalReplanningRangeDevice replanDev(&pathTask);
@@ -74,9 +79,9 @@ int main (int argc, char** argv) {
 
 	robot.runAsync(true);
 	robot.lock();
-//	locTask.localizeRobotAtHomeBlocking();
+	locTask.localizeRobotAtHomeBlocking();
 	robot.unlock();
-	pathTask.pathPlanToPose(ArPose(200, 200, 0), true, true);
+	pathTask.pathPlanToPose(ArPose(4000, 200, 0), true, true);
 	robot.enableMotors();
 	robot.waitForRunExit();
 	Aria::shutdown();
