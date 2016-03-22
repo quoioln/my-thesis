@@ -60,7 +60,7 @@ int main (int argc, char** argv) {
 	ArPathPlanningTask pathPlan(&robot, &sonarDev, &map);
 	ArActionGoto gotoPoseAction("goto");
 //	gotoPoseAction.activate();
-	pathPlan.getPathPlanActionGroup()->addAction(&gotoPoseAction, 50);
+//	pathPlan.getPathPlanActionGroup()->addAction(&gotoPoseAction, 50);
 //	pathPlan.getPathPlanAction()->activate();
 	ArForbiddenRangeDevice forbidden(&map);
 	robot.addRangeDevice(&forbidden);
@@ -89,9 +89,27 @@ int main (int argc, char** argv) {
 	robot.enableMotors();
 	pathPlan.runAsync();
 
-	ArPathPlanningTask::PathPlanningState state = pathPlan.getState();
+//	ArPathPlanningTask::PathPlanningState state = pathPlan.getState();
 //	while(!pathPlan.pathPlanToPose(ArPose(1000, 1000, 0), true, true));
 	pathPlan.pathPlanToPose(ArPose(1000, 1000, 0), true, true);
+	ArPathPlanningTask::PathPlanningState state = pathPlan.getState();
+	char* s = "";
+	switch(state)
+	  {
+	    case ArPathPlanningTask::NOT_INITIALIZED: {s = "NOT_INITIALIZED"; break;}
+	    case ArPathPlanningTask::PLANNING_PATH: { s = "PLANNING_PATH";break;}
+	    case ArPathPlanningTask::MOVING_TO_GOAL:{s = "MOVING_TO_GOAL";break;}
+	    case ArPathPlanningTask::REACHED_GOAL: {s = "REACHED_GOAL";break;}
+	    case ArPathPlanningTask::FAILED_PLAN: { s = "FAILED_PLAN";break;}
+	    case ArPathPlanningTask::FAILED_MOVE: { s="FAILED_MOVE";break;}
+	    case ArPathPlanningTask::ABORTED_PATHPLAN:{s = "ABORTED_PATHPLAN";break;}
+//	    case ArPathPlanningTask::INVALID:
+//	    default:
+//	      return "UNKNOWN";
+	  }
+	ArLog::log(ArLog::Normal,s);
+	robot.waitForRunExit();
+//	pathPlan.
 //	char* text = new char[512];
 //	pathPlan.getStatusString(text, sizeof(text));
 //	 printf("Planning status: %s.\n", text);
