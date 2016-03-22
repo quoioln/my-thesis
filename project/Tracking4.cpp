@@ -27,9 +27,10 @@
 using namespace cv;
 using namespace std;
 
-const float f = 135.7648799, X = 202, px = 0.264583333333334;
+const float f = 135.7648799, X = 100, px = 0.264583333333334;
 const float maxWidth = 640, maxHeight = 480, delta = 40;
 const float stopDistance = 250;
+const int lenght = 25;
 Mat image;
 Rect selection;
 RotatedRect trackBox;
@@ -61,7 +62,7 @@ void GotoGoal::init(int argc, char **argv){
 //	myRobot->setDirectMotionPrecedenceTime(1000);
 //	myRobot->setCycleTime(50);
 //	myRobot->setDirectMotionPrecedenceTime()
-	myRobot->setStateReflectionRefreshTime(100);
+	myRobot->setStateReflectionRefreshTime(200);
 	server->runAsync();
 	myRobot->enableMotors();
 	myRobot->lock();
@@ -321,7 +322,7 @@ int main(int argc, char **argv) {
 		gotoGoal.disableDirectionCommand();
 	}
 	*/
-	gotoGoal.enableDirectionCommand();
+	gotoGoal.disableDirectionCommand();
 
 	float angle = 0;
 	VideoCapture cap;
@@ -345,6 +346,71 @@ int main(int argc, char **argv) {
 	c.load("cascade.xml");
 	Mat frame, hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
 	float vel = 0;
+	ArPose* poseList = readPostitions("positions.txt");
+//	ArTime start; //timer
+//	//	start.setToNow();//start timer
+//		ArPose* poseList = readPostitions("positions.txt");
+//		int length = ARRAY_SIZE(poseList);
+//		cout <<"size of = "<<sizeof(poseList)<<endl;
+//		for (int i = 0; i < 28; i++) {
+//
+//			gotoPoseAction.setGoal(poseList[i]);
+//			while (!gotoPoseAction.haveAchievedGoal()) {
+	int i = 0;
+	bool findObject = false;
+	while(i < 25 && !findObject) {
+		gotoGoal.gotoGoal(poseList[i]);
+		while (!gotoGoal.haveAchievedGoal()) {
+			cap >> frame;
+			if( frame.empty() ){
+				cout<<"error camera"<<endl;
+				break;
+			}
+			frame.copyTo(image);
+			cvtColor(image, hsv, COLOR_BGR2HSV);
+			int _vmin = vmin, _vmax = vmax;
+			inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)),
+					Scalar(180, 256, MAX(_vmin, _vmax)), mask);
+			if (!checkObject)
+				checkObject = detect(frame, c);
+			if (checkObject){
+				if(trackObject(hsv, mask)) {
+					float d = distance();
+					if (d <= 300) {
+						gotoGoal.move(d - 250);
+					} else if (d <= 250){
+						gotoGoal.stop();
+					} else {
+						vel = d * 0.7;
+						vel = (int) (vel/50) * 50;
+						if (vel > 200)
+							vel = 200;
+						gotoGoal.setVel(vel);
+					}
+					angle =  determindRotate();
+					cout <<"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
+					if (angle != 0) {
+						gotoGoal.stop();
+						gotoGoal.rotate(angle);
+					}
+
+				} else {
+					checkObject = false;
+					cout<< "Bat sai"<<endl;
+				}
+			} else {
+				gotoGoal.stop();
+				cout<< "Bat lai doi tuong"<<endl;
+			}
+			imshow("main", image);
+			imshow( "threshold", mask );
+			imshow( "Histogram", histimg );
+			char c = (char)waitKey(10);
+			if( c == 27 )
+				break;
+		}
+	}
+/*
 	while(true) {
 		cap >> frame;
 		if( frame.empty() ){
@@ -362,7 +428,7 @@ int main(int argc, char **argv) {
 			if(trackObject(hsv, mask)) {
 				float d = distance();
 				if (d <= 300) {
-					gotoGoal.move(-200);
+					gotoGoal.move(d - 250);
 				} else if (d <= 250){
 					gotoGoal.stop();
 				} else {
@@ -393,8 +459,8 @@ int main(int argc, char **argv) {
 		char c = (char)waitKey(10);
 		if( c == 27 )
 			break;
-//		imshow("main", frame);
 	}
+	*/
 	gotoGoal.shutdown();
 }
 

@@ -67,7 +67,7 @@ bool Tracking::detect(){
 //	 cap >> frame;
 	 frame.copyTo(image);
 //	 frame.copyTo(image);
-	 namedWindow( "main", 0 );
+//	 namedWindow( "main", 0 );
 	 cvtColor(image, hsv, COLOR_BGR2HSV);
 	 int _vmin = vmin, _vmax = vmax;
 	 cv::inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)), Scalar(180, 256, MAX(_vmin, _vmax)), mask);
@@ -385,8 +385,9 @@ int main(int argc, char **argv) {
 
 	float angle = 0;
 
-//	namedWindow( "threshold", 0 );
-//	namedWindow( "Histogram", 0 );
+	namedWindow( "threshold", 0 );
+	namedWindow( "Histogram", 0 );
+	namedWindow( "main", 0 );
 //	tracking.setFrame();
 	float vel = 0;
 	while(true) {

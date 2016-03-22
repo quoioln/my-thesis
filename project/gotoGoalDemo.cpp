@@ -21,7 +21,6 @@ ArPose* readPostitions(char* fileName){
 		is >>line;
 		cout <<"*"<<atoi(line)<<"*"<<endl;
 		if (check) {
-
 			pose.setX(atoi(line));
 			check = false;
 		} else {
@@ -33,11 +32,11 @@ ArPose* readPostitions(char* fileName){
 	}
 
 	is.close();
-	/*
+
 	for (int i = 0 ; i < 4; i++) {
 			cout <<"("<<postitionList[i].getX()<<", "<<postitionList[i].getY()<<")"<<endl;
 	}
-	*/
+
 	return postitionList;
 }
 int main (int argc, char** argv) {
@@ -79,7 +78,7 @@ int main (int argc, char** argv) {
 	// it will still work.
 //	map.setIgnoreCase(true);
 
-	ArPose* poseList = readPostitions("positions.txt");
+
 
 	robot.runAsync(true);
 	robot.enableMotors();
@@ -92,21 +91,47 @@ int main (int argc, char** argv) {
 	ArActionGoto gotoPoseAction("goto", ArPose(0, 0, 0), 200);
 	ArActionAvoidFront avoidFront("avoid front");
 	ArActionStallRecover stallRecover("stall recover");
+	ArActionTurn actionTurn;
 	robot.addAction(&gotoPoseAction, 50);
 	robot.addAction(&avoidFront, 60);
+<<<<<<< HEAD
 	//robot.addAction(&stallRecover, 70);
 	robot.moveTo(ArPose(0,0,0));
 	int length = ARRAY_SIZE(poseList);
 	cout<<"do dai"<<length;
 	int i = 0;
 	while(1) {
+=======
+
+	ArActionAvoidSide avoidSide;
+	ArActionLimiterForwards	limitForwards;
+	 ArActionConstantVelocity constrant("Constant Velocity", 400);
+	robot.addAction(&stallRecover, 70);
+//	robot.addAction(&constrant, 20);
+//	robot.addAction(&actionTurn, 40);
+//	robot.addAction(&avoidSide, 60);
+//	robot.addAction(&limitForwards, 80);
+//	robot.moveTo(ArPose(0,0,0));
+//	gotoPoseAction.setGoal(ArPose(3000, 0, 0));
+//	ArTime start; //timer
+//	start.setToNow();//start timer
+	ArPose* poseList = readPostitions("positions.txt");
+	int length = ARRAY_SIZE(poseList);
+	cout <<"size of = "<<sizeof(poseList)<<endl;
+	for (int i = 0; i < 28; i++) {
+
+>>>>>>> 76bba8538dd99ff2ac463386c0ce273a2030e02a
 		gotoPoseAction.setGoal(poseList[i]);
 		while (!gotoPoseAction.haveAchievedGoal()) {
 			ArLog::log(ArLog::Normal, "goal(%.2f, %0.2f) x = %.2f, y = %.2f", poseList[i].getX(), poseList[i].getY(), robot.getX(), robot.getY());
 		}
+<<<<<<< HEAD
 		i++;
+=======
+//		cout <<"("<<poseList[i].getX()<<", "<<poseList[i].getY()<<")";
+>>>>>>> 76bba8538dd99ff2ac463386c0ce273a2030e02a
 	}
-
+	robot.waitForRunExit();
 	ArUtil::sleep(2000);
 	Aria::shutdown();
 }

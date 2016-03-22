@@ -6,8 +6,10 @@ private:
 	ArSonarDevice* sonarDev;
 	ArActionAvoidFront avoidFrontAction;
 	ArActionGoto gotoGoalAction;
+	ArActionStallRecover stallRecover;
 	ArServerBase* server;
 	ArServerInfoRobot* serverInfo;
+//	ArServerCommands
 public:
 	GotoGoal(ArRobot* myRobot, ArSonarDevice* sonar, ArServerBase* server, ArServerInfoRobot* serverInfo);
 	void init(int argc, char **argv);
@@ -24,4 +26,5 @@ public:
 	void disableDirectionCommand();
 	void shutdown();
 	void move(int distance);
+	void cancelGoal();
 };

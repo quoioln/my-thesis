@@ -18,8 +18,10 @@ void GotoGoal::init(int argc, char **argv){
 	myRobot->addRangeDevice(sonarDev);
 	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 200);
 	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 10);
+	stallRecover = ArActionStallRecover("stallRecover");
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->addAction(&avoidFrontAction, 60);
+	myRobot->addAction(&stallRecover, 70);
 
 	myRobot->enableMotors();
 
