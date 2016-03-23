@@ -21,9 +21,6 @@
 #include <math.h>
 #include <cmath>
 
-//, X = 105f, px = 0.264583333333334f
-
-//float z = (135.7648799 * 105)/(sizeImage * 0.264583333333334);
 using namespace cv;
 using namespace std;
 
@@ -35,9 +32,6 @@ const int timeOut = 120000;
 Mat image;
 Rect selection;
 RotatedRect trackBox;
-//RotatedRect trackBox;
-//#define X 105f
-//#define px 0.264583333333334f
 int vmin = 77;
 int	vmax = 256;
 int	smin = 130;
@@ -47,12 +41,9 @@ GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar, ArServerBase* server, A
 	this->sonarDev = sonar;
 	this->server = server;
 	this->serverInfo = serverInfo;
-
-//	this->serverInfo = ArServerInfoRobot(this->server, this->myRobot);
 }
 void GotoGoal::init(int argc, char **argv){
 	myRobot->runAsync(true);
-
 	myRobot->moveTo(ArPose(0,0,0));
 	myRobot->comInt(ArCommands::ENABLE, 1);
 	myRobot->addRangeDevice(sonarDev);
@@ -62,15 +53,10 @@ void GotoGoal::init(int argc, char **argv){
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->addAction(&avoidFrontAction, 60);
 	myRobot->addAction(&stallRecover, 70);
-//	myRobot->setDirectMotionPrecedenceTime(1000);
-//	myRobot->setCycleTime(50);
-//	myRobot->setDirectMotionPrecedenceTime()
-//	myRobot->setStateReflectionRefreshTime(100);
 	server->runAsync();
-	myRobot->enableMotors();
+//	myRobot->enableMotors();
 	myRobot->lock();
 	myRobot->setRotAccel(2000);
-
 	myRobot->unlock();
 
 };
@@ -81,18 +67,7 @@ void GotoGoal::stop(){
 	myRobot->unlock();
 };
 
-/*
-bool GotoGoal::disableAction(ArAction action){
-	bool checked = false;
-	return checked;
-}; quoi khung
-bool GotoGoal::enbleAction(ArAction action){
-	bool checked = false;
-	return checked;
-};
-*/
 void GotoGoal::gotoGoal(ArPose pose){
-
 	if (!gotoGoalAction.isActive()) {
 		ArLog::log(ArLog::Normal, "action goto goal is deactive");
 		return;
@@ -101,17 +76,13 @@ void GotoGoal::gotoGoal(ArPose pose){
 		ArLog::log(ArLog::Normal, "action avoid front is deactive. Robot is unsafe");
 		return;
 	}
-
 	gotoGoalAction.setGoal(pose);
 };
 void GotoGoal::rotate(float angle){
 
 	myRobot->lock();
-	//myRobot->setRotAccel()
 	myRobot->setDeltaHeading(angle);
 	myRobot->unlock();
-//	ArLog::log(ArLog::Normal, "RotAccel = %f",myRobot->getRotAccel());
-//	while(!myRobot->isHeadingDone());
 };
 void GotoGoal::setVel(float vel){
 	myRobot->lock();
@@ -164,7 +135,6 @@ ArPose* readPostitions(char* fileName){
 	int i = 0;
 	while (!is.eof()) {
 		is >>line;
-//		cout <<"*"<<atoi(line)<<"*"<<endl;
 		if (check) {
 
 			pose.setX(atoi(line));
@@ -182,7 +152,6 @@ ArPose* readPostitions(char* fileName){
 bool detect(Mat frame, CascadeClassifier cascade) {
 	std::vector<cv::Rect> ball;
 	cascade.detectMultiScale(frame, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
-//	cout <<"size = "<<ball.size()<<endl;
 	int sizeball = ball.size();
 	if (sizeball != 1)
 		 return false;
@@ -236,8 +205,6 @@ bool trackObject(Mat hsv, Mat mask){
 		return false;
 	ellipse( image, trackBox, Scalar(0,0,255), 3, LINE_AA );
 	long  x = trackBox.center.x;
-
-	cout << "x = " << x <<endl;
 	return true;
 };
 float distance()
@@ -258,7 +225,6 @@ float determindAngle(float x, float y) {
 float determindRotate() {
 	long  x = trackBox.center.x;
 	long  y = trackBox.center.y;
-//	cout << "x = " << x <<  "\ty = " << y <<endl;
 	if (x <= 200)
 		return (0 - determindAngle(x, y));
 //		return -10;
@@ -287,18 +253,18 @@ int main(int argc, char **argv) {
 	ArServerBase server;
 	ArServerSimpleOpener simpleOpener(&parser);
 	char fileDir[1024];
-	  ArUtil::addDirectories(fileDir, sizeof(fileDir), Aria::getDirectory(),
-				 "ArNetworking/examples");
+	ArUtil::addDirectories(fileDir, sizeof(fileDir), Aria::getDirectory(),
+			 "ArNetworking/examples");
 
-	  // first open the server up
-	  if (!simpleOpener.open(&server, fileDir, 240))
-	  {
-	    if (simpleOpener.wasUserFileBad())
-	      printf("Bad user/password/permissions file\n");
-	    else
-	      printf("Could not open server port\n");
-	    exit(1);
-	  }
+	// first open the server up
+	if (!simpleOpener.open(&server, fileDir, 240))
+	{
+	if (simpleOpener.wasUserFileBad())
+	  printf("Bad user/password/permissions file\n");
+	else
+	  printf("Could not open server port\n");
+	exit(1);
+	}
 	ArServerInfoRobot serverInfo(&server, &robot);
 	GotoGoal gotoGoal(&robot, &sonar, &server, &serverInfo);
 	gotoGoal.init(argc, argv);
@@ -330,8 +296,11 @@ int main(int argc, char **argv) {
 	while(i < 25 && !findObject) {
 		gotoGoal.gotoGoal(poseList[i]);
 		timer.setToNow();
+
 		while (!gotoGoal.haveAchievedGoal()) {
+
 			if (timer.getMSec() > timeOut) {
+				gotoGoal.cancelGoal();
 				break;
 			}
 			cap >> frame;
@@ -344,7 +313,6 @@ int main(int argc, char **argv) {
 			int _vmin = vmin, _vmax = vmax;
 			inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)),
 					Scalar(180, 256, MAX(_vmin, _vmax)), mask);
-			detect(frame, c);
 
 			if (!checkObject)
 				checkObject = detect(frame, c);
@@ -354,6 +322,7 @@ int main(int argc, char **argv) {
 				if(trackObject(hsv, mask)) {
 					float d = distance();
 					if (d <= 250) {
+						gotoGoal.setVel(20);
 						gotoGoal.move(d - 250);
 					} else if (d <= 300){
 						gotoGoal.stop();
@@ -366,22 +335,24 @@ int main(int argc, char **argv) {
 						if (vel > 200)
 							vel = 200;
 //						gotoGoal.setVel(vel);
-						gotoGoal.move(20);
+						gotoGoal.move(d - 250);
+//						gotoGoal.move(20);
 					}
 					angle =  determindRotate();
-//					ArLog::log(ArLog::Normal,"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
+
+					cout<<"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
 					if (angle != 0) {
-//						robot.stop();
 						gotoGoal.rotate(angle);
 					}
-
 				} else {
 					checkObject = false;
 					cout<< "Bat sai"<<endl;
 					gotoGoal.disableDirectionCommand();
+//					gotoGoal.cancelGoal();
 				}
 			} else {
-//				gotoGoal.stop();
+				cout <<"Goal("<<poseList[i].getX()<<", "<<poseList[i].getY()<<")"<<endl;
+
 				ArLog::log(ArLog::Normal, "Tim doi tuong");
 			}
 
@@ -390,9 +361,7 @@ int main(int argc, char **argv) {
 			imshow( "Histogram", histimg );
 
 		}
-
 		i++;
-
 	}
 	gotoGoal.shutdown();
 }

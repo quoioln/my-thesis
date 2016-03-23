@@ -80,8 +80,13 @@ int main (int argc, char** argv) {
 	robot.runAsync(true);
 	robot.lock();
 	locTask.localizeRobotAtHomeBlocking();
+//	pathTask.
+	ArPose pose;
+	pose.setX(4000);
+	pose.setY(-1000);
+	pose.setTh(9);
 	robot.unlock();
-	pathTask.pathPlanToPose(ArPose(4000, 200, 0), true, true);
+	pathTask.pathPlanToPose(pose, true, true);
 	robot.enableMotors();
 	robot.waitForRunExit();
 	Aria::shutdown();

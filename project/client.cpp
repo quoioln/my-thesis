@@ -41,8 +41,8 @@ Adept MobileRobots, 10 Columbia Drive, Amherst, NH 03031; +1-603-881-7960
 #include "Aria.h"
 #include "ArNetworking.h"
 #include "ArClientHandlerRobotUpdate.h"
-
-
+#include <iostream>
+using namespace std;
 
 
 int main(int argc, char **argv)
@@ -84,10 +84,11 @@ int main(int argc, char **argv)
  
   ArClientHandlerRobotUpdate updates(&client);
   updates.requestUpdates();
-
+  ArPose pose;
   while (client.getRunningWithLock())
   {
     //updates.lock();
+	  pose = updates.getPose();
     printf("Mode:%s  Status:%s  Pos:%.0f,%.0f,%.0f  Vel:%.0f,%.0f,%.0f  Bat:%.1f  \r",
 		updates.getMode(),
 		updates.getStatus(),
@@ -98,6 +99,7 @@ int main(int argc, char **argv)
 	//updates.unlock();
     ArUtil::sleep(200);
   }
+  cout <<"Vi tri pose("<<pose.getX()<<", "<<pose.getY()<<")"<<endl;
 
   /* The client stopped running, due to disconnection from the server, general
    * Aria shutdown, or some other reason. */

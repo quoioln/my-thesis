@@ -299,29 +299,6 @@ int main(int argc, char **argv) {
 
 
 //	tracking.trackbar("Trackbar");
-	/*
-	ArPose* poseList = readPostitions("positions.txt");
-	int length = ARRAY_SIZE(poseList);
-	for (int i = 0; i < length; i++) {
-		gotoGoal.gotoGoal(poseList[i]);
-		//ArLog(ArLog::Normal, "postive = %f, y = %f", poseList[i].getX(), poseList[i].getY());
-		ArLog::log(ArLog::Normal, "postition x = %f, y = %f", poseList[i].getX(), poseList[i].getY());
-		while (!gotoGoal.haveAchievedGoal()) {
-			ArPose pose = gotoGoal.getPose();
-			ArLog::log(ArLog::Normal, "x = %.2f, y = %.2f", pose.getX(), pose.getY());
-			ArUtil::sleep(50);
-		}
-
-		int t = 1;
-		gotoGoal.enableDirectionCommand();
-		while(t * 90 <= 360) {
-			gotoGoal.rotate(90);
-			while(!gotoGoal.haveRotated());
-			t++;
-		}
-		gotoGoal.disableDirectionCommand();
-	}
-	*/
 	gotoGoal.disableDirectionCommand();
 
 	float angle = 0;
@@ -346,6 +323,7 @@ int main(int argc, char **argv) {
 	c.load("cascade.xml");
 	Mat frame, hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
 	float vel = 0;
+	/*
 	ArPose* poseList = readPostitions("positions.txt");
 //	ArTime start; //timer
 //	//	start.setToNow();//start timer
@@ -410,7 +388,8 @@ int main(int argc, char **argv) {
 				break;
 		}
 	}
-/*
+	*/
+
 	while(true) {
 		cap >> frame;
 		if( frame.empty() ){
@@ -428,21 +407,20 @@ int main(int argc, char **argv) {
 		if (checkObject){
 			if(trackObject(hsv, mask)) {
 				float d = distance();
-				if (d <= 300) {
+				if (d <= 250) {
 					gotoGoal.move(d - 250);
-				} else if (d <= 250){
+				} else if (d <= 300){
 					gotoGoal.stop();
 				} else {
 					vel = d * 0.7;
 					vel = (int) (vel/50) * 50;
 					if (vel > 200)
 						vel = 200;
-					gotoGoal.setVel(vel);
+					gotoGoal.move(d - 250);
 				}
 				angle =  determindRotate();
 				cout <<"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
 				if (angle != 0) {
-					gotoGoal.stop();
 					gotoGoal.rotate(angle);
 				}
 
@@ -452,7 +430,7 @@ int main(int argc, char **argv) {
 			}
 		} else {
 			gotoGoal.stop();
-			cout<< "Bat lai doi tuong"<<endl;
+			cout<< "Tim doi tuong"<<endl;
 		}
 		imshow("main", image);
 		imshow( "threshold", mask );
@@ -461,7 +439,7 @@ int main(int argc, char **argv) {
 		if( c == 27 )
 			break;
 	}
-	*/
+
 	gotoGoal.shutdown();
 }
 
