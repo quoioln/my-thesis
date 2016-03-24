@@ -7,6 +7,7 @@ private:
 	ArActionAvoidFront avoidFrontAction;
 	ArActionGoto gotoGoalAction;
 	ArActionStallRecover stallRecover;
+	ArActionAvoidSide avoidSide;
 	ArServerBase* server;
 	ArServerInfoRobot* serverInfo;
 //	ArServerCommands

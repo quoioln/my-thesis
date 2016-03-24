@@ -102,7 +102,11 @@ int main(int argc, char **argv)
 	//updates.unlock();
     ArUtil::sleep(200);
   }
+<<<<<<< HEAD
   cout <<"Da tim thay qua bong o vi tri pose("<<pose.getX()<<", "<<pose.getY()<<")"<<endl;
+=======
+  cout <<"Vi tri pose("<<pose.getX()<<", "<<pose.getY()<<")"<<endl;
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 
   /* The client stopped running, due to disconnection from the server, general
    * Aria shutdown, or some other reason. */

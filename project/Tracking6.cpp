@@ -28,7 +28,13 @@ const float f = 135.7648799, X = 100, px = 0.264583333333334;
 const float maxWidth = 640, maxHeight = 480, delta = 40;
 const float stopDistance = 250;
 const int lenght = 25;
+<<<<<<< HEAD
 const int timeOut = 60000;
+=======
+const int timeOut = 120000;
+const int myAngle = 45;
+
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 Mat image;
 Rect selection;
 RotatedRect trackBox;
@@ -44,21 +50,29 @@ GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar, ArServerBase* server, A
 }
 void GotoGoal::init(int argc, char **argv){
 	myRobot->runAsync(true);
+<<<<<<< HEAD
 	myRobot->moveTo(ArPose(0,0,0));
+=======
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 	myRobot->comInt(ArCommands::ENABLE, 1);
 	myRobot->addRangeDevice(sonarDev);
-	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 200);
-	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 10);
+	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 400, 200, 100, 20);
+	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 20, true);
 	stallRecover = ArActionStallRecover("stall recover", 300, 50, 200, 20, true);
+//	avoidSide = ArActionAvoidSide("", 200, 20);
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->addAction(&avoidFrontAction, 60);
+//	myRobot->addAction(&avoidSide, 50);
 	myRobot->addAction(&stallRecover, 70);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 	server->runAsync();
 //	myRobot->enableMotors();
 	myRobot->lock();
 	myRobot->setRotAccel(2000);
 	myRobot->unlock();
-
 };
 void GotoGoal::stop(){
 	myRobot->lock();
@@ -98,11 +112,13 @@ bool GotoGoal::haveRotated(){
 void GotoGoal::enableDirectionCommand(){
 	gotoGoalAction.deactivate();
 	avoidFrontAction.deactivate();
+	stallRecover.deactivate();
 };
 void GotoGoal::disableDirectionCommand(){
 	myRobot->clearDirectMotion();
 	gotoGoalAction.activate();
 	avoidFrontAction.activate();
+	stallRecover.activate();
 
 };
 ArPose GotoGoal::getPose(){
@@ -277,13 +293,13 @@ int main(int argc, char **argv) {
 	//var check find ball
 	bool checkObject = false;
 	int hsize = 16;
-	namedWindow( "threshold", 0 );
-	namedWindow( "trackbar", 0 );
-	namedWindow( "Histogram", 0 );
-	namedWindow( "main", 0 );
-	createTrackbar( "Vmin", "trackbar", &vmin, 256, 0 );
-	createTrackbar( "Vmax", "trackbar", &vmax, 256, 0 );
-	createTrackbar( "Smin", "trackbar", &smin, 256, 0 );
+//	namedWindow( "threshold", 0 );
+//	namedWindow( "trackbar", 0 );
+//	namedWindow( "Histogram", 0 );
+//	namedWindow( "main", 0 );
+//	createTrackbar( "Vmin", "trackbar", &vmin, 256, 0 );
+//	createTrackbar( "Vmax", "trackbar", &vmax, 256, 0 );
+//	createTrackbar( "Smin", "trackbar", &smin, 256, 0 );
 	CascadeClassifier c;
 	c.load("cascade.xml");
 	Mat frame, hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
@@ -293,12 +309,35 @@ int main(int argc, char **argv) {
 
 	int i = 0;
 	bool findObject = false;
+
 	while(i < 25 && !findObject) {
 		gotoGoal.gotoGoal(poseList[i]);
+		int turn = 0;
 		timer.setToNow();
+<<<<<<< HEAD
 
 		while (!gotoGoal.haveAchievedGoal()) {
 
+=======
+		bool checkAchievedGoal = false;
+		while (!checkAchievedGoal ){//|| (!gotoGoal.haveRotated() && turn != 0 && turn < 8)) {
+			if (gotoGoal.haveAchievedGoal())
+				checkAchievedGoal = true;
+			/*
+			if (gotoGoal.haveAchievedGoal() && turn == 0) {
+				checkAchievedGoal = true;
+				gotoGoal.enableDirectionCommand();
+				cout <<"Quay "<<turn * myAngle<<" do"<<endl;
+				i++;
+				gotoGoal.rotate(turn * myAngle);
+			} else if(turn < 8){
+				turn++;
+				cout <<"Quay "<<turn * myAngle<<" do"<<endl;
+				gotoGoal.rotate(turn * myAngle);
+			}
+			*/
+			cout<<"x = "<<gotoGoal.getPose().getX()<<"\t y = "<<gotoGoal.getPose().getY()<<endl;
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 			if (timer.getMSec() > timeOut) {
 				gotoGoal.cancelGoal();
 				break;
@@ -344,7 +383,11 @@ int main(int argc, char **argv) {
 					if (angle != 0) {
 						gotoGoal.rotate(angle);
 					}
+<<<<<<< HEAD
 				} else {
+=======
+				} else if (turn == 0){
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 					checkObject = false;
 					cout<< "Bat sai"<<endl;
 					gotoGoal.disableDirectionCommand();
@@ -355,13 +398,27 @@ int main(int argc, char **argv) {
 
 				ArLog::log(ArLog::Normal, "Tim doi tuong");
 			}
+<<<<<<< HEAD
 
+=======
+			/*
+			if (turn != 0) {
+				gotoGoal.rotate(myAngle * turn);
+				cout <<"Quay "<<turn * myAngle<<" do"<<endl;
+				turn++;
+			}
+			*/
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 //			imshow("main", image);
 //			imshow( "threshold", mask );
 //			imshow( "Histogram", histimg );
 
 		}
 		i++;
+<<<<<<< HEAD
+=======
+		gotoGoal.disableDirectionCommand();
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 	}
 	gotoGoal.shutdown();
 }
