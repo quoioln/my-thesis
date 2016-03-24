@@ -89,6 +89,7 @@ int main(int argc, char **argv)
   {
     //updates.lock();
 	  pose = updates.getPose();
+	  /*
     printf("Mode:%s  Status:%s  Pos:%.0f,%.0f,%.0f  Vel:%.0f,%.0f,%.0f  Bat:%.1f  \r",
 		updates.getMode(),
 		updates.getStatus(),
@@ -96,6 +97,8 @@ int main(int argc, char **argv)
 		updates.getVel(), updates.getLatVel(), updates.getRotVel(),
 		updates.getVoltage()
 	);
+	*/
+	  ArLog::log(ArLog::Normal,"Pos:%.2f,%.2f \r",pose.getX(), pose.getY());
 	//updates.unlock();
     ArUtil::sleep(200);
   }

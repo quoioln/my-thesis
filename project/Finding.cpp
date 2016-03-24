@@ -1,6 +1,10 @@
-#include "GotoGoal3.h"
 #include <iostream>
 #include <fstream>
+#include "Aria.h"
+#include "Arnl.h"
+#include "ArSonarLocalizationTask.h"
+#include "ArSystemStatus.h"
+#include "GotoGoal3.h"
 #include <opencv2/core/utility.hpp>
 #include "opencv2/video/tracking.hpp"
 #include "opencv2/imgproc.hpp"
@@ -20,17 +24,14 @@
 #include <ctype.h>
 #include <math.h>
 #include <cmath>
+#define ARRAY_SIZE(array)(sizeof(array[0])/sizeof(array))
 
-//, X = 105f, px = 0.264583333333334f
-
-//float z = (135.7648799 * 105)/(sizeImage * 0.264583333333334);
 using namespace cv;
 using namespace std;
 
-const float f = 135.7648799, X = 100, px = 0.264583333333334;
+const float f = 135.7648799, X = 202, px = 0.264583333333334;
 const float maxWidth = 640, maxHeight = 480, delta = 40;
 const float stopDistance = 250;
-const int lenght = 25;
 Mat image;
 Rect selection;
 RotatedRect trackBox;
@@ -59,10 +60,7 @@ void GotoGoal::init(int argc, char **argv){
 	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 10);
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->addAction(&avoidFrontAction, 60);
-//	myRobot->setDirectMotionPrecedenceTime(1000);
-//	myRobot->setCycleTime(50);
-//	myRobot->setDirectMotionPrecedenceTime()
-	myRobot->setStateReflectionRefreshTime(200);
+	myRobot->setStateReflectionRefreshTime(100);
 	server->runAsync();
 	myRobot->enableMotors();
 	myRobot->lock();
@@ -78,16 +76,6 @@ void GotoGoal::stop(){
 	myRobot->unlock();
 };
 
-/*
-bool GotoGoal::disableAction(ArAction action){
-	bool checked = false;
-	return checked;
-}; quoi khung
-bool GotoGoal::enbleAction(ArAction action){
-	bool checked = false;
-	return checked;
-};
-*/
 void GotoGoal::gotoGoal(ArPose pose){
 
 	if (!gotoGoalAction.isActive()) {
@@ -104,11 +92,8 @@ void GotoGoal::gotoGoal(ArPose pose){
 void GotoGoal::rotate(float angle){
 
 	myRobot->lock();
-	//myRobot->setRotAccel()
 	myRobot->setDeltaHeading(angle);
 	myRobot->unlock();
-//	ArLog::log(ArLog::Normal, "RotAccel = %f",myRobot->getRotAccel());
-//	while(!myRobot->isHeadingDone());
 };
 void GotoGoal::setVel(float vel){
 	myRobot->lock();
@@ -148,33 +133,9 @@ void GotoGoal::move(int distance) {
 	myRobot->move(distance);
 	myRobot->unlock();
 }
-ArPose* readPostitions(char* fileName){
-	ArPose* postitionList = new ArPose[1000];
-	ArPose pose;
-	ifstream is(fileName);
-	char line[20];
-	bool check = true;
-	int i = 0;
-	while (!is.eof()) {
-		is >>line;
-		cout <<"*"<<atoi(line)<<"*"<<endl;
-		if (check) {
-
-			pose.setX(atoi(line));
-			check = false;
-		} else {
-			pose.setY(atoi(line));
-			postitionList[i] = pose;
-			check = true;
-			i++;
-		}
-	}
-	is.close();
-	return postitionList;
-}
 bool detect(Mat frame, CascadeClassifier cascade) {
 	std::vector<cv::Rect> ball;
-	cascade.detectMultiScale(frame, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
+	cascadex.detectMultiScale(frame, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
 	cout <<"size = "<<ball.size()<<endl;
 	int sizeball = ball.size();
 	if (sizeball != 1)
@@ -254,15 +215,40 @@ float determindRotate() {
 	cout << "x = " << x <<  "\ty = " << y <<endl;
 	if (x <= 200)
 		return (0 - determindAngle(x, y));
-//		return -10;
 	else if (x <= 440)
 		return 0;
 	else
-//		return 10;
-	return determindAngle(x, y);
+		return determindAngle(x, y);
 }
 
-int main(int argc, char **argv) {
+void addGoalDone(ArPose pose) {
+	ArLog::log(ArLog::Normal, "x = %f, y = %f", pose.getX(), pose.getY());
+}
+ArPose* readPostitions(char* fileName){
+	ArPose* postitionList = new ArPose[1000];
+	ArPose pose;
+	ifstream is(fileName);
+	char line[20];
+	bool check = true;
+	int i = 0;
+	while (!is.eof()) {
+		is >>line;
+		cout <<"*"<<atoi(line)<<"*"<<endl;
+		if (check) {
+
+			pose.setX(atoi(line));
+			check = false;
+		} else {
+			pose.setY(atoi(line));
+			postitionList[i] = pose;
+			check = true;
+			i++;
+		}
+	}
+	is.close();
+	return postitionList;
+}
+int main (int argc, char** argv) {
 	Aria::init();
 	ArRobot robot;
 	ArSonarDevice sonar;
@@ -275,8 +261,25 @@ int main(int argc, char **argv) {
 		{
 			Aria::logOptions();
 			Aria::exit(1);
+			return 1;
 		}
 	}
+
+	ArSonarDevice sonarDev;
+	ArPose* poseList = readPostitions("positions.txt");
+	robot.runAsync(true);
+	robot.enableMotors();
+	robot.moveTo(ArPose(0,0,0));
+	robot.comInt(ArCommands::ENABLE, 1);
+	robot.addRangeDevice(&sonarDev);
+	ArActionGoto gotoPoseAction("goto", ArPose(0, 0, 0), 200);
+	ArActionAvoidFront avoidFront("avoid front");
+	ArActionStallRecover stallRecover("stall recover");
+	robot.addAction(&gotoPoseAction, 50);
+	robot.addAction(&avoidFront, 60);
+	robot.moveTo(ArPose(0,0,0));
+	int length = ARRAY_SIZE(poseList);
+	cout<<"do dai"<<length;
 	ArServerBase server;
 	ArServerSimpleOpener simpleOpener(&parser);
 	char fileDir[1024];
@@ -295,12 +298,6 @@ int main(int argc, char **argv) {
 	ArServerInfoRobot serverInfo(&server, &robot);
 	GotoGoal gotoGoal(&robot, &sonar, &server, &serverInfo);
 	gotoGoal.init(argc, argv);
-//	namedWindow( "main", 0 );
-
-
-//	tracking.trackbar("Trackbar");
-	gotoGoal.disableDirectionCommand();
-
 	float angle = 0;
 	VideoCapture cap;
 	cap.open(0);
@@ -308,8 +305,7 @@ int main(int argc, char **argv) {
 	//var check find ball
 	bool checkObject = false;
 	int hsize = 16;
-//	float hranges[] = {0,180};
-//	const float* phranges = hranges;
+
 	namedWindow( "threshold", 0 );
 	namedWindow( "trackbar", 0 );
 	namedWindow( "Histogram", 0 );
@@ -317,80 +313,14 @@ int main(int argc, char **argv) {
 	createTrackbar( "Vmin", "trackbar", &vmin, 256, 0 );
 	createTrackbar( "Vmax", "trackbar", &vmax, 256, 0 );
 	createTrackbar( "Smin", "trackbar", &smin, 256, 0 );
-//	cvI
-//	imshow("")
+
 	CascadeClassifier c;
 	c.load("cascade.xml");
 	Mat frame, hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
 	float vel = 0;
-	/*
-	ArPose* poseList = readPostitions("positions.txt");
-//	ArTime start; //timer
-//	//	start.setToNow();//start timer
-//		ArPose* poseList = readPostitions("positions.txt");
-//		int length = ARRAY_SIZE(poseList);
-//		cout <<"size of = "<<sizeof(poseList)<<endl;
-//		for (int i = 0; i < 28; i++) {
-//
-//			gotoPoseAction.setGoal(poseList[i]);
-//			while (!gotoPoseAction.haveAchievedGoal()) {
 	int i = 0;
-	bool findObject = false;
-	while(i < 25 && !findObject) {
-		gotoGoal.gotoGoal(poseList[i]);
-		while (!gotoGoal.haveAchievedGoal()) {
-			cap >> frame;
-			if( frame.empty() ){
-				cout<<"error camera"<<endl;
-				break;
-			}
-			frame.copyTo(image);
-			cvtColor(image, hsv, COLOR_BGR2HSV);
-			int _vmin = vmin, _vmax = vmax;
-			inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)),
-					Scalar(180, 256, MAX(_vmin, _vmax)), mask);
-			if (!checkObject)
-				checkObject = detect(frame, c);
-			if (checkObject){
-				if(trackObject(hsv, mask)) {
-					float d = distance();
-					if (d <= 300) {
-						gotoGoal.move(d - 250);
-					} else if (d <= 250){
-						gotoGoal.stop();
-					} else {
-						vel = d * 0.7;
-						vel = (int) (vel/50) * 50;
-						if (vel > 200)
-							vel = 200;
-						gotoGoal.setVel(vel);
-					}
-					angle =  determindRotate();
-					cout <<"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
-					if (angle != 0) {
-						gotoGoal.stop();
-						gotoGoal.rotate(angle);
-					}
-
-				} else {
-					checkObject = false;
-					cout<< "Bat sai"<<endl;
-				}
-			} else {
-				gotoGoal.stop();
-				cout<< "Bat lai doi tuong"<<endl;
-			}
-			imshow("main", image);
-			imshow( "threshold", mask );
-			imshow( "Histogram", histimg );
-			char c = (char)waitKey(10);
-			if( c == 27 )
-				break;
-		}
-	}
-	*/
-
-	while(true) {
+	while(1)
+	{
 		cap >> frame;
 		if( frame.empty() ){
 			cout<<"error camera"<<endl;
@@ -399,46 +329,49 @@ int main(int argc, char **argv) {
 		frame.copyTo(image);
 		cvtColor(image, hsv, COLOR_BGR2HSV);
 		int _vmin = vmin, _vmax = vmax;
-		inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)),
-				Scalar(180, 256, MAX(_vmin, _vmax)), mask);
-		if (!checkObject)
-			checkObject = detect(frame, c);
-		if (checkObject){
-			if(trackObject(hsv, mask)) {
-				float d = distance();
-				if (d <= 250) {
-					gotoGoal.move(d - 250);
-				} else if (d <= 300){
-					gotoGoal.stop();
-				} else {
-					vel = d * 0.7;
-					vel = (int) (vel/50) * 50;
-					if (vel > 200)
-						vel = 200;
-					gotoGoal.move(d - 250);
+		inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)),	Scalar(180, 256, MAX(_vmin, _vmax)), mask);
+		gotoPoseAction.setGoal(poseList[i]);
+		while (!gotoPoseAction.haveAchievedGoal()) 
+		{
+			ArLog::log(ArLog::Normal, "goal(%.2f, %0.2f) x = %.2f, y = %.2f", poseList[i].getX(), poseList[i].getY(), robot.getX(), robot.getY());
+//			if (!checkObject)
+			   checkObject = detect(frame, c);
+			if (checkObject)
+				cout <<"Phat hien doi tuong"<<endl;
+			else
+				cout <<"Khong phat hien doi tuong"<<endl;
+			if (checkObject) {
+				if(trackObject(hsv, mask)) {
+					float d = distance();
+					if (d < 250) {
+						gotoGoal.move(-200);
+					} else if ( d >= 250 && d <= 300) {
+						gotoGoal.stop();
+					}
+					else {
+						vel = d * 0.7;
+						vel = (int) (vel/50) * 50;
+						if(vel > 200) {
+							vel = 200;
+							gotoGoal.setVel(vel);
+						}
+						angle =  determindRotate();
+						cout <<"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
+						if (angle != 0) {
+							gotoGoal.stop();
+							gotoGoal.rotate(angle);
+						}
+					}
 				}
-				angle =  determindRotate();
-				cout <<"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
-				if (angle != 0) {
-					gotoGoal.rotate(angle);
-				}
-
-			} else {
-				checkObject = false;
-				cout<< "Bat sai"<<endl;
 			}
-		} else {
-			gotoGoal.stop();
-			cout<< "Tim doi tuong"<<endl;
+			imshow("main", image);
+			imshow( "threshold", mask );
+			imshow( "Histogram", histimg );
 		}
-		imshow("main", image);
-		imshow( "threshold", mask );
-		imshow( "Histogram", histimg );
-		char c = (char)waitKey(10);
-		if( c == 27 )
-			break;
+		i++;
 	}
 
-	gotoGoal.shutdown();
-}
+	ArUtil::sleep(2000);
+	Aria::shutdown();
 
+}

@@ -20,7 +20,7 @@ using namespace cv;
 using namespace std;
 
 Mat image;
-
+const float delta = 40;
 bool backprojMode = false;
 bool selectObject = false;
 int trackObject = 0;
@@ -164,7 +164,10 @@ int main( int argc, const char** argv )
 
 					 selection &= Rect(0, 0, image.cols, image.rows);
 	//				 selection = r;
-					 checkObject = true;
+					if (abs((float)r->width - (float)r->height) > delta)
+						checkObject = false;
+					 else
+						checkObject = true;
 				 }
 //				 if (ball.size() > 0)
 //					 checkObject = true;
@@ -237,6 +240,8 @@ int main( int argc, const char** argv )
 
 					float width = trackBox.size.width;
 					float height = trackBox.size.height;
+					if (abs(width - height) >  delta)// || width < 10 || height < 10)
+						trackObject = 0;
 
 				if (true) {
 //					if (image.size > 0)

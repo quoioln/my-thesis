@@ -94,6 +94,14 @@ int main (int argc, char** argv) {
 	ArActionTurn actionTurn;
 	robot.addAction(&gotoPoseAction, 50);
 	robot.addAction(&avoidFront, 60);
+<<<<<<< HEAD
+	//robot.addAction(&stallRecover, 70);
+	robot.moveTo(ArPose(0,0,0));
+	int length = ARRAY_SIZE(poseList);
+	cout<<"do dai"<<length;
+	int i = 0;
+	while(1) {
+=======
 
 	ArActionAvoidSide avoidSide;
 	ArActionLimiterForwards	limitForwards;
@@ -112,11 +120,16 @@ int main (int argc, char** argv) {
 	cout <<"size of = "<<sizeof(poseList)<<endl;
 	for (int i = 0; i < 28; i++) {
 
+>>>>>>> 76bba8538dd99ff2ac463386c0ce273a2030e02a
 		gotoPoseAction.setGoal(poseList[i]);
 		while (!gotoPoseAction.haveAchievedGoal()) {
 			ArLog::log(ArLog::Normal, "goal(%.2f, %0.2f) x = %.2f, y = %.2f", poseList[i].getX(), poseList[i].getY(), robot.getX(), robot.getY());
 		}
+<<<<<<< HEAD
+		i++;
+=======
 //		cout <<"("<<poseList[i].getX()<<", "<<poseList[i].getY()<<")";
+>>>>>>> 76bba8538dd99ff2ac463386c0ce273a2030e02a
 	}
 	robot.waitForRunExit();
 	ArUtil::sleep(2000);
