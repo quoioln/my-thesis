@@ -28,19 +28,22 @@ using namespace cv;
 using namespace std;
 
 const float f = 135.7648799, X = 100, px = 0.264583333333334;
-const float maxWidth = 640, maxHeight = 480, delta = 40;
+const float maxWidth = 640, maxHeight = 480, delta = 80;
 const float stopDistance = 250;
 const int lenght = 25;
+const int timeOut = 120000;
 Mat image;
 Rect selection;
 RotatedRect trackBox;
 //RotatedRect trackBox;
 //#define X 105f
 //#define px 0.264583333333334f
-int vmin = 77;
+//int vmin = 77;
+//int	vmax = 256;
+//int	smin = 130;
+int vmin = 122;
 int	vmax = 256;
-int	smin = 130;
-
+int	smin = 170;
 GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar, ArServerBase* server, ArServerInfoRobot* serverInfo){
 	this->myRobot = robot;
 	this->sonarDev = sonar;
@@ -57,16 +60,18 @@ void GotoGoal::init(int argc, char **argv){
 	myRobot->addRangeDevice(sonarDev);
 	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 200);
 	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 10);
+	stallRecover = ArActionStallRecover("stall recover", 300, 50, 200, 20, true);
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->addAction(&avoidFrontAction, 60);
+	myRobot->addAction(&stallRecover, 70);
 //	myRobot->setDirectMotionPrecedenceTime(1000);
 //	myRobot->setCycleTime(50);
 //	myRobot->setDirectMotionPrecedenceTime()
-	myRobot->setStateReflectionRefreshTime(200);
+//	myRobot->setStateReflectionRefreshTime(100);
 	server->runAsync();
 	myRobot->enableMotors();
 	myRobot->lock();
-	myRobot->setRotAccel(5000);
+	myRobot->setRotAccel(2000);
 
 	myRobot->unlock();
 
@@ -135,6 +140,7 @@ ArPose GotoGoal::getPose(){
 	return myRobot->getPose();
 }
 void GotoGoal::shutdown(){
+	Aria::exit(0);
 	Aria::shutdown();
 };
 void GotoGoal::lock(){
@@ -148,6 +154,9 @@ void GotoGoal::move(int distance) {
 	myRobot->move(distance);
 	myRobot->unlock();
 }
+void GotoGoal::cancelGoal(){
+	gotoGoalAction.cancelGoal();
+}
 ArPose* readPostitions(char* fileName){
 	ArPose* postitionList = new ArPose[1000];
 	ArPose pose;
@@ -157,7 +166,7 @@ ArPose* readPostitions(char* fileName){
 	int i = 0;
 	while (!is.eof()) {
 		is >>line;
-		cout <<"*"<<atoi(line)<<"*"<<endl;
+//		cout <<"*"<<atoi(line)<<"*"<<endl;
 		if (check) {
 
 			pose.setX(atoi(line));
@@ -175,7 +184,7 @@ ArPose* readPostitions(char* fileName){
 bool detect(Mat frame, CascadeClassifier cascade) {
 	std::vector<cv::Rect> ball;
 	cascade.detectMultiScale(frame, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
-	cout <<"size = "<<ball.size()<<endl;
+//	cout <<"size = "<<ball.size()<<endl;
 	int sizeball = ball.size();
 	if (sizeball != 1)
 		 return false;
@@ -225,12 +234,11 @@ bool trackObject(Mat hsv, Mat mask){
 	TermCriteria( TermCriteria::EPS | TermCriteria::COUNT, 10, 1 ));
 	float width = trackBox.size.width;
 	float height = trackBox.size.height;
-	if (abs(width - height) >  delta)// || width < 10 || height < 10)
+	if (abs(width - height) >  200)// || width < 10 || height < 10)
 		return false;
 	ellipse( image, trackBox, Scalar(0,0,255), 3, LINE_AA );
 	long  x = trackBox.center.x;
 
-	cout << "x = " << x <<endl;
 	return true;
 };
 float distance()
@@ -251,15 +259,15 @@ float determindAngle(float x, float y) {
 float determindRotate() {
 	long  x = trackBox.center.x;
 	long  y = trackBox.center.y;
-	cout << "x = " << x <<  "\ty = " << y <<endl;
+//	cout << "x = " << x <<  "\ty = " << y <<endl;
 	if (x <= 200)
-		//return (0 - determindAngle(x, y));
-		return 10;
+		return (0 - determindAngle(x, y));
+//		return -10;
 	else if (x <= 440)
 		return 0;
 	else
-		return -10;
-	//return determindAngle(x, y);
+//		return 10;
+	return determindAngle(x, y);
 }
 
 int main(int argc, char **argv) {
@@ -295,10 +303,6 @@ int main(int argc, char **argv) {
 	ArServerInfoRobot serverInfo(&server, &robot);
 	GotoGoal gotoGoal(&robot, &sonar, &server, &serverInfo);
 	gotoGoal.init(argc, argv);
-//	namedWindow( "main", 0 );
-
-
-//	tracking.trackbar("Trackbar");
 	gotoGoal.disableDirectionCommand();
 
 	float angle = 0;
@@ -308,8 +312,6 @@ int main(int argc, char **argv) {
 	//var check find ball
 	bool checkObject = false;
 	int hsize = 16;
-//	float hranges[] = {0,180};
-//	const float* phranges = hranges;
 	namedWindow( "threshold", 0 );
 	namedWindow( "trackbar", 0 );
 	namedWindow( "Histogram", 0 );
@@ -317,28 +319,22 @@ int main(int argc, char **argv) {
 	createTrackbar( "Vmin", "trackbar", &vmin, 256, 0 );
 	createTrackbar( "Vmax", "trackbar", &vmax, 256, 0 );
 	createTrackbar( "Smin", "trackbar", &smin, 256, 0 );
-//	cvI
-//	imshow("")
 	CascadeClassifier c;
 	c.load("cascade.xml");
 	Mat frame, hsv, hue, mask, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
 	float vel = 0;
-	/*
 	ArPose* poseList = readPostitions("positions.txt");
-//	ArTime start; //timer
-//	//	start.setToNow();//start timer
-//		ArPose* poseList = readPostitions("positions.txt");
-//		int length = ARRAY_SIZE(poseList);
-//		cout <<"size of = "<<sizeof(poseList)<<endl;
-//		for (int i = 0; i < 28; i++) {
-//
-//			gotoPoseAction.setGoal(poseList[i]);
-//			while (!gotoPoseAction.haveAchievedGoal()) {
+	ArTime timer; //timer
+
 	int i = 0;
 	bool findObject = false;
 	while(i < 25 && !findObject) {
 		gotoGoal.gotoGoal(poseList[i]);
+		timer.setToNow();
 		while (!gotoGoal.haveAchievedGoal()) {
+			if (timer.getMSec() > timeOut) {
+				break;
+			}
 			cap >> frame;
 			if( frame.empty() ){
 				cout<<"error camera"<<endl;
@@ -349,96 +345,55 @@ int main(int argc, char **argv) {
 			int _vmin = vmin, _vmax = vmax;
 			inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)),
 					Scalar(180, 256, MAX(_vmin, _vmax)), mask);
+
 			if (!checkObject)
 				checkObject = detect(frame, c);
+
 			if (checkObject){
+				gotoGoal.enableDirectionCommand();
 				if(trackObject(hsv, mask)) {
 					float d = distance();
-					if (d <= 300) {
+					if (d <= 250) {
 						gotoGoal.move(d - 250);
-					} else if (d <= 250){
+					} else if (d <= 300){
 						gotoGoal.stop();
+						findObject =  true;
+						gotoGoal.cancelGoal();
+						break;
 					} else {
 						vel = d * 0.7;
 						vel = (int) (vel/50) * 50;
 						if (vel > 200)
 							vel = 200;
-						gotoGoal.setVel(vel);
+//						gotoGoal.setVel(vel);
+						gotoGoal.move(d - 250);
 					}
 					angle =  determindRotate();
-					cout <<"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
+					cout << "khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
 					if (angle != 0) {
-						gotoGoal.stop();
-						gotoGoal.rotate(angle);
+//						robot.stop();
 					}
+						gotoGoal.rotate(angle);
 
 				} else {
 					checkObject = false;
 					cout<< "Bat sai"<<endl;
+					gotoGoal.disableDirectionCommand();
 				}
 			} else {
-				gotoGoal.stop();
-				cout<< "Bat lai doi tuong"<<endl;
+//				gotoGoal.stop();
+				ArLog::log(ArLog::Normal, "Tim doi tuong");
 			}
+
 			imshow("main", image);
 			imshow( "threshold", mask );
 			imshow( "Histogram", histimg );
-			char c = (char)waitKey(10);
-			if( c == 27 )
-				break;
+
 		}
+
+		i++;
+
 	}
-	*/
-
-	while(true) {
-		cap >> frame;
-		if( frame.empty() ){
-			cout<<"error camera"<<endl;
-			break;
-		}
-		frame.copyTo(image);
-		cvtColor(image, hsv, COLOR_BGR2HSV);
-		int _vmin = vmin, _vmax = vmax;
-		inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)),
-				Scalar(180, 256, MAX(_vmin, _vmax)), mask);
-		if (!checkObject)
-			checkObject = detect(frame, c);
-		if (checkObject){
-			if(trackObject(hsv, mask)) {
-				float d = distance();
-				if (d <= 250) {
-					gotoGoal.move(d - 250);
-				} else if (d <= 300){
-					gotoGoal.stop();
-				} else {
-					vel = d * 0.7;
-					vel = (int) (vel/50) * 50;
-					if (vel > 200)
-						vel = 200;
-					gotoGoal.move(d - 250);
-				}
-				angle =  determindRotate();
-				cout <<"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
-				if (angle != 0) {
-					gotoGoal.rotate(angle);
-				}
-
-			} else {
-				checkObject = false;
-				cout<< "Bat sai"<<endl;
-			}
-		} else {
-			gotoGoal.stop();
-			cout<< "Tim doi tuong"<<endl;
-		}
-		imshow("main", image);
-		imshow( "threshold", mask );
-		imshow( "Histogram", histimg );
-		char c = (char)waitKey(10);
-		if( c == 27 )
-			break;
-	}
-
 	gotoGoal.shutdown();
 }
 
