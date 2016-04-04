@@ -10,10 +10,18 @@ private:
 	ArActionAvoidSide avoidSide;
 	ArServerBase* server;
 	ArServerInfoRobot* serverInfo;
+	ArServerHandlerCommands* serverHanlerCommands;
+	ArServerSimpleComUC* serverSimpleComUC;
+	ArGlobalFunctor enableCB;
+	ArServerFileToClient* serverFileToClient;
 //	ArServerCommands
 public:
-	GotoGoal(ArRobot* myRobot, ArSonarDevice* sonar, ArServerBase* server, ArServerInfoRobot* serverInfo);
+	GotoGoal();
+//	GotoGoal(ArRobot* myRobot, ArSonarDevice* sonar, ArServerBase* server, ArServerInfoRobot* serverInfo, ArServerHandlerCommands* serverHanlerCommands, ArServerSimpleComUC* serverSimpleComUC);
+	GotoGoal(ArRobot* myRobot, ArSonarDevice* sonar, ArServerBase* server, ArServerFileToClient * serverFileToClient);//, ArServerInfoRobot* serverInfo, ArServerHandlerCommands* serverHanlerCommands, ArServerSimpleComUC* serverSimpleComUC);
 	void init(int argc, char **argv);
+	void enableRobot();
+	void disableRobot();
 	void stop();
 	void lock();
 	void unlock();

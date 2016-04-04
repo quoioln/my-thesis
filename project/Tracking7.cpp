@@ -20,7 +20,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <cmath>
-
+#include "sstream"
 using namespace cv;
 using namespace std;
 
@@ -28,7 +28,7 @@ const float f = 135.7648799, X = 100, px = 0.264583333333334;
 const float maxWidth = 640, maxHeight = 480, delta = 40;
 const float stopDistance = 250;
 const int lenght = 25;
-const int timeOut = 120000;
+const int timeOut = 180000;
 const int myAngle = 45;
 
 Mat image, mask, hsv, frame;
@@ -38,35 +38,40 @@ int vmin = 77;
 int	vmax = 256;
 int	smin = 130;
 
+//var check find ball
+bool checkObject = false;
 
+int findObject = 0;
+bool test;
 
 GotoGoal gotoGoal;
 void activeMotor(ArNetPacket * packet)
 {
-  printf("Function1 called\n");
-//  packet->strToBuf("test");
-//  packet->strToBuf("test2");
-  gotoGoal.enable();
-  gotoGoal.disableDirectionCommand();
+	gotoGoal.enableRobot();
+	gotoGoal.disableDirectionCommand();
 }
-void test(ArServerClient* client, ArNetPacket*) {
+void deactiveRobot(ArNetPacket * packet)
+{
+	gotoGoal.disableRobot();
+//	gotoGoal.disableDirectionCommand();
+}
+void sendData(ArServerClient* client, ArNetPacket*) {
 	ArNetPacket reply;
-//	reply.strToBuf("sendding");
-	reply.doubleToBuf(1);
+	reply.doubleToBuf(findObject);
     client->sendPacketUdp(&reply);
 }
-/*
-void test(void) {
-	cout <<"test funtion is called";
-}
-*/
-void enable(GotoGoal* gotoGoal) {
-	gotoGoal->disableDirectionCommand();
-}
-//var check find ball
-bool checkObject = false;
 
-bool findObject = false;
+void sendPoseRobot(ArServerClient* client, ArNetPacket*) {
+	ArNetPacket reply;
+	ArPose pose = gotoGoal.getPose();
+	reply.doubleToBuf(pose.getX());
+	reply.doubleToBuf(pose.getY());
+//	stringstream content;
+//	content<<"x = "<<pose.getX()<<"  y = "<<pose.getY();
+//	cout <<"x = "<<pose.getX()<<"\ty = "<<pose.getY()<<endl;
+    client->sendPacketUdp(&reply);
+}
+
 GotoGoal::GotoGoal(){
 	this->myRobot = NULL;
 	this->sonarDev = NULL;
@@ -74,33 +79,24 @@ GotoGoal::GotoGoal(){
 	this->serverInfo = NULL;
 	this->serverHanlerCommands = NULL;
 	this->serverSimpleComUC = NULL;
+	this->serverFileToClient = NULL;
 }
-GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar, ArServerBase* server){
-//	myRobot->setEncoderPose(ArPose)
-//	ArPose pose;
-//	pose.get
-//	myRobot->setEncoderPose(pose.set)
+GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar, ArServerBase* server, ArServerFileToClient * serverFileToClient){
 	this->myRobot = robot;
 	this->sonarDev = sonar;
 	this->server = server;
 	this->serverInfo = new ArServerInfoRobot(this->server, this->myRobot);
 	this->serverHanlerCommands = new ArServerHandlerCommands(this->server);
 	this->serverSimpleComUC = new ArServerSimpleComUC(this->serverHanlerCommands, this->myRobot);
-//	this->enableCB = new ArGlobalFunctor(&function1);
-//						 ArGlobalFunctor
+	this->serverFileToClient = serverFileToClient;//ArServerFileToClient(this->server, ".");
 	ArNetPacket packet;
 	this->serverHanlerCommands->addCommand("requestEnableMotor", "request enable motor", new ArGlobalFunctor1<ArNetPacket *>(&activeMotor));
+	this->serverHanlerCommands->addCommand("requestDisableMotor", "request disable motor", new ArGlobalFunctor1<ArNetPacket *>(&deactiveRobot));
 //	this->serverHanlerCommands->addCommand("test", "test", new ArGlobalFunctor2<ArServerClient*, ArNetPacket*>(&test));
-	this->server->addData("test", "some wierd test", new ArGlobalFunctor2<ArServerClient*, ArNetPacket*>(&test), "none", "none");
-	this->server->broadcastPacketTcp(&packet, "test");
-//	this->serverHanlerCommands->addCommand("testFunctor", "test", new ArGlobalFunctor(&test));
-//	this->serverHanlerCommands->
-//	ArNetPacket packet;
-//	packet.bufToData("2001", 4);
-//	server->broadcastPacketTcp(&packet, "data");
-//	serverHanlerCommands->addCommand("Function1", "Call the function that is number 1!",
-//				    new ArGlobalFunctor(&function1));
-//	server->
+	this->server->addData("handleCheckObjectData", "some wierd test", new ArGlobalFunctor2<ArServerClient*, ArNetPacket*>(&sendData), "none", "none");
+	this->server->addData("handlePoseRobot", "pose robot", new ArGlobalFunctor2<ArServerClient*, ArNetPacket*>(&sendPoseRobot), "none", "none");
+	this->server->broadcastPacketTcp(&packet, "handleCheckObjectData");
+	this->server->broadcastPacketTcp(&packet, "handlePoseRobot");
 }
 void GotoGoal::init(int argc, char **argv){
 	myRobot->runAsync(true);
@@ -128,7 +124,12 @@ void GotoGoal::stop(){
 	myRobot->setVel(0);
 	myRobot->unlock();
 };
-
+void GotoGoal::enableRobot() {
+	myRobot->enableMotors();
+}
+void GotoGoal::disableRobot(){
+	myRobot->disableMotors();
+}
 void GotoGoal::gotoGoal(ArPose pose){
 	if (!gotoGoalAction.isActive()) {
 		ArLog::log(ArLog::Normal, "action goto goal is deactive");
@@ -220,7 +221,7 @@ bool detect(Mat frame, CascadeClassifier cascade) {
 	if (sizeball != 1)
 		 return false;
 	 vector<Rect>::const_iterator r = ball.begin();
-	 if (abs((float)r->width - (float)r->height) > delta || r->width < 10 || r->height < 10)
+	 if (abs((float)r->width - (float)r->height) > delta || r->width < 30 || r->height < 30)
 		 return false;
 	 selection.x = r->x;
 	 selection.y = r->y;
@@ -267,7 +268,7 @@ bool trackObject(Mat hsv, Mat mask){
 	TermCriteria( TermCriteria::EPS | TermCriteria::COUNT, 10, 1 ));
 	float width = trackBox.size.width;
 	float height = trackBox.size.height;
-	if (abs(width - height) >  delta)// || width < 10 || height < 10)
+	if (abs(width - height) >  delta || width < 30 || height < 30)
 		return false;
 	ellipse( image, trackBox, Scalar(0,0,255), 3, LINE_AA );
 	long  x = trackBox.center.x;
@@ -311,9 +312,12 @@ bool follow(Mat hsv, Mat mask) {
 			gotoGoal.move(d - 250);
 		} else if (d <= 300){
 			gotoGoal.stop();
-			findObject =  true;
+			findObject =  1;
+			
 //			gotoGoal.cancelGoal();
 //			break;
+				cout<<"save image";
+				imwrite("./image/ball.jpg", image);
 			return false;
 		} else {
 			vel = d * 0.7;
@@ -333,9 +337,6 @@ bool follow(Mat hsv, Mat mask) {
 	} else {
 		checkObject = false;
 		cout<< "Bat sai"<<endl;
-//		gotoGoal.disableDirectionCommand();
-//		return false;;
-//					gotoGoal.cancelGoal();
 	}
 	return true;
 }
@@ -401,10 +402,11 @@ int main(int argc, char **argv) {
 	exit(1);
 	}
 //	ArServerInfoRobot serverInfo(&server, &robot);
-	gotoGoal = GotoGoal(&robot, &sonar, &server);//, &serverInfo, &serverHanlerCommands, &serverSimpleComUC);
+	ArServerFileToClient serverFileToClient(&server, ".");
+	gotoGoal = GotoGoal(&robot, &sonar, &server, &serverFileToClient);//, &serverInfo, &serverHanlerCommands, &serverSimpleComUC);
 	gotoGoal.init(argc, argv);
-//	gotoGoal.disableDirectionCommand();
-	gotoGoal.enableDirectionCommand();
+	gotoGoal.disableDirectionCommand();
+//	gotoGoal.enableDirectionCommand();
 //	while(gotoGoal.isStop());
 //	gotoGoal.disableDirectionCommand();
 	float angle = 0;
@@ -422,18 +424,28 @@ int main(int argc, char **argv) {
 	ArTime timer; //timer
 
 	int i = 0;
-	bool findObject = false;
 
-	while(i < 25 && !findObject) {
+	while(i < 25 ) {//&& !findObject) {
 		gotoGoal.gotoGoal(poseList[i]);
 		timer.setToNow();
+
 		bool checkAchievedGoal = false;
 		while (!gotoGoal.haveAchievedGoal()) {
+			gotoGoal.lock();
+			cout <<"time = "<<timer.mSecSince()<<endl;
+			gotoGoal.unlock();
 			cout<<"x = "<<gotoGoal.getPose().getX()<<"\t y = "<<gotoGoal.getPose().getY()<<endl;
+
+			//if (timer.mSecSince() >= 10000)
+				//test = 1;
 			if (timer.getMSec() > timeOut) {
 				gotoGoal.cancelGoal();
 				break;
 			}
+//			if (findObject == 1) {
+//				cout<<"save image";
+//				imwrite("./image/ball.jpg", image);
+//			}
 			if (!readFrame(cap))
 				break;
 			if (!checkObject)
@@ -443,6 +455,10 @@ int main(int argc, char **argv) {
 					gotoGoal.cancelGoal();
 					break;
 				}
+//				if (findObject == 1) {
+//					cout<<"save image";
+//					imwrite("./image/ball.jpg", image);
+//				}
 				if (!checkObject) {
 					int turn = 0;
 
@@ -459,7 +475,13 @@ int main(int argc, char **argv) {
 							if (checkObject){
 //								gotoGoal.disableDirectionCommand();
 								if (!follow(hsv, mask))
-								break;
+									break;
+
+//								if (findObject == 1) {
+//									cout<<"save image";
+//									imwrite("./image/ball.jpg", image);
+//								}
+
 							}
 							if (!showFrames())
 								break;
@@ -479,12 +501,16 @@ int main(int argc, char **argv) {
 		gotoGoal.enableDirectionCommand();
 
 		int turn = 0;
+
 		while (turn < 7) {
+
+
 			turn ++;
 			gotoGoal.setVel(0);
 			gotoGoal.rotate(myAngle);
 			cout <<"Quay "<<turn * myAngle<<" do"<<endl;
 			while(!gotoGoal.haveRotated()) {
+
 				if (!readFrame(cap))
 					break;
 				if (!checkObject)
@@ -494,6 +520,10 @@ int main(int argc, char **argv) {
 					if (!follow(hsv, mask))
 					break;
 				}
+//				if (findObject == 1) {
+//					cout<<"save image";
+//					imwrite("./image/ball.jpg", image);
+//				}
 				if (!showFrames())
 					break;
 			}

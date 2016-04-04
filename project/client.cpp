@@ -42,8 +42,81 @@ Adept MobileRobots, 10 Columbia Drive, Amherst, NH 03031; +1-603-881-7960
 #include "ArNetworking.h"
 #include "ArClientHandlerRobotUpdate.h"
 #include <iostream>
-using namespace std;
+#include <opencv2/core/utility.hpp>
+#include "opencv2/video/tracking.hpp"
+#include "opencv2/imgproc.hpp"
+#include "opencv2/videoio.hpp"
+#include "opencv2/highgui.hpp"
+#include <cv.h>
+#include <cxcore.h>
+#include <highgui.h>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <iostream>
+#include <opencv2/core/types_c.h>
+#include <opencv2/objdetect.hpp>
+#include <opencv2/opencv.hpp>
 
+using namespace std;
+using namespace cv;
+
+
+double checkObject = 0;
+bool a = false;
+//FILE fileTemp = NULL;
+FILE *file = NULL;
+void netGetFile(ArNetPacket *packet)
+{
+	cout <<"get file is called";
+  int ret;
+  char fileName[2048];
+  ret = packet->bufToUByte2();
+  packet->bufToStr(fileName, sizeof(fileName));
+  if (ret != 0)
+  {
+    printf("Bad return %d on file %s\n", ret, fileName);
+    exit(1);
+  }
+  if (file == NULL)
+  {
+    printf("Getting file %s\n", fileName);
+    if ((file = ArUtil::fopen("ballDetect.jpg", "w")) == NULL)
+    {
+      printf("Can't open fileClientRaw.jpg to dump file into\n");
+      exit(2);
+    }
+  }
+  ArTypes::UByte4 numBytes;
+  char buf[32000];
+  //file should be good here, so just write into it
+  numBytes = packet->bufToUByte4();
+  if (numBytes == 0)
+  {
+    printf("Got all of file %s\n", fileName);
+    fclose(file);
+    a = true;
+    ArUtil::sleep(100);
+//    exit(0);
+  }
+  else
+  {
+    printf("Got %d bytes of file %s\n", numBytes, fileName);
+    packet->bufToData(buf, numBytes);
+    fwrite(buf, 1, numBytes, file);
+  }
+  //Ar
+}
+
+void recieveData(ArNetPacket* packet) {
+}
+void enable(ArNetPacket* packet) {
+	double sinal = packet->bufToDouble();
+	cout <<"recieve "<<sinal<<endl;
+	if (sinal == 1) {
+		gotoGoal.enableRobot();
+	}
+}
 
 int main(int argc, char **argv)
 {
@@ -76,32 +149,60 @@ int main(int argc, char **argv)
   } 
 
   printf("Connected to server.\n");
-
   client.setRobotName(client.getHost()); // include server name in log messages
-
   client.runAsync();
+  ArNetPacket request;
+//  request.
+//  client.requestOnceByCommand(ArCommands::ENABLE, )
 
- 
+
   ArClientHandlerRobotUpdate updates(&client);
+//  client.requestOnce("enableMotor");
+
+  ArGlobalFunctor1<ArNetPacket*> enableCB(&enable);
+  ArGlobalFunctor1<ArNetPacket *> getFileCB(&netGetFile);
+  ArGlobalFunctor1<ArNetPacket*> recieveDataCB(&recieveData);
+
+  client.addHandler("requestEnableMotor", &enableCB);
+  client.addHandler("sendData", &recieveDataCB);
+  //client.addHandler("getFile", &getFileCB);
+
+  client.requestOnce("requestEnableMotor");
   updates.requestUpdates();
+  if (checkObject)
+	client.requestOnceWithString("getFile", "./image/ball.jpg");
   ArPose pose;
+  namedWindow("image", 0);
   while (client.getRunningWithLock())
   {
-    //updates.lock();
-	  pose = updates.getPose();
+
+	  client.requestOnce("sendData");
+
+	  if (checkObject) {
+	//	  if (!a) {
+			  cout <<"OK"<<endl;
+		//	  client.requestOnceWithString("getFile", "./image/ball.jpg");
+			  client.addHandler("getFile", &getFileCB);
+//			  client.remHandler("getFile", &getFileCB);
+		  //}	else {
+			  client.remHandler("getFile", &getFileCB);
+		  //}
+		  Mat image;
+		  image = imread("./image/ball.jpg", CV_LOAD_IMAGE_COLOR);
+		  
+		  imshow("image", image);
+		  char c = (char)waitKey(10);
+		  if( c == 27 )
+			break;
+	  }
 	  /*
-    printf("Mode:%s  Status:%s  Pos:%.0f,%.0f,%.0f  Vel:%.0f,%.0f,%.0f  Bat:%.1f  \r",
-		updates.getMode(),
-		updates.getStatus(),
-		updates.getX(), updates.getY(), updates.getTh(),
-		updates.getVel(), updates.getLatVel(), updates.getRotVel(),
-		updates.getVoltage()
-	);
-	*/
-	  ArLog::log(ArLog::Normal,"Pos:%.2f,%.2f \r",pose.getX(), pose.getY());
-	//updates.unlock();
+	  if (client.dataExists("testFunctor")) {
+		  cout <<"Test OK";
+	  }
+	  */
     ArUtil::sleep(200);
   }
+//  client.requestStop("getFile");
   cout <<"Vi tri pose("<<pose.getX()<<", "<<pose.getY()<<")"<<endl;
 
   /* The client stopped running, due to disconnection from the server, general

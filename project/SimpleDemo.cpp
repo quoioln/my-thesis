@@ -74,13 +74,13 @@ void SimpleTask::task(void)
   myGoalDone = false;
   myState++;
   if (myState == 1)
-    myPathTask->pathPlanToPose(ArPose(-1000, -1000, 0), true);
+    myPathTask->pathPlanToPose(ArPose(2000, -1000, 0), true);
   //else if (myState == 1)
   //myPathTask->pathPlanToGoal("Goal1");
   else
   {
     myState = 0;
-    myPathTask->pathPlanToPose(myHome, true);
+    myPathTask->pathPlanToPose(ArPose(3000, -1000, 0), true);
   }
 }
 
