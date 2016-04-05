@@ -31,7 +31,7 @@ Rect selection;
 
 //int vmin = 10, vmax = 256, smin = 30;
 //int vmin = 162, vmax = 256, smin = 153;
-int vmin = 77, vmax = 256, smin = 130;
+int vmin = 122, vmax = 256, smin = 170;
 
 static void onMouse( int event, int x, int y, int, void* )
 {

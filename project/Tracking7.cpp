@@ -436,34 +436,35 @@ int main(int argc, char **argv) {
 			if (!checkObject)
 				checkObject = detect(frame, c);
 			showFrames();
-			if(checkObject) {
-				if (!checkObject){
-					int turn = 0;
-					gotoGoal.enableDirectionCommand();
-					while (turn < 17) {
-						turn ++;
-						gotoGoal.rotate(myAngle);
-						cout <<"Quay "<<turn * myAngle<<" do"<<endl;
-						gotoGoal.setVel(0);
-						while(!gotoGoal.haveRotated()) {
-							if (!readFrame(cap))
-								break;
-							if (!checkObject)
-								checkObject = detect(frame, c);
-							if (checkObject){
-								break;
-							}
-							showFrames();
-						}
-					}
-				}
+
 				gotoGoal.enableDirectionCommand();
 				while(checkObject) {
 					readFrame(cap);
 					follow(hsv, mask);
 					showFrames();
 				}
-			}
+//				if(checkObject) {
+					if (!checkObject){
+						int turn = 0;
+						gotoGoal.enableDirectionCommand();
+						while (turn < 17) {
+							turn ++;
+							gotoGoal.rotate(myAngle);
+							cout <<"Quay "<<turn * myAngle<<" do"<<endl;
+							gotoGoal.setVel(0);
+							while(!gotoGoal.haveRotated()) {
+								if (!readFrame(cap))
+									break;
+								if (!checkObject)
+									checkObject = detect(frame, c);
+								if (checkObject){
+									break;
+								}
+								showFrames();
+							}
+						}
+					}
+//				}
 			gotoGoal.disableDirectionCommand();
 		}
 		cout <<"Da den muc tieu!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";

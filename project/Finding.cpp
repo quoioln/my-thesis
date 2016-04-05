@@ -135,7 +135,7 @@ void GotoGoal::move(int distance) {
 }
 bool detect(Mat frame, CascadeClassifier cascade) {
 	std::vector<cv::Rect> ball;
-	cascadex.detectMultiScale(frame, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
+	cascade.detectMultiScale(frame, ball, 1.1 , 2, CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
 	cout <<"size = "<<ball.size()<<endl;
 	int sizeball = ball.size();
 	if (sizeball != 1)

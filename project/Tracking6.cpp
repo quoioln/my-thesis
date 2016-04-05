@@ -28,10 +28,18 @@ const float f = 135.7648799, X = 100, px = 0.264583333333334;
 const float maxWidth = 640, maxHeight = 480, delta = 40;
 const float stopDistance = 250;
 const int lenght = 25;
+<<<<<<< HEAD
+const int timeOut = 60000;
+=======
 const int timeOut = 120000;
 const int myAngle = 45;
 
+<<<<<<< HEAD
 Mat image, mask, hsv, frame;
+=======
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
+Mat image;
+>>>>>>> 5d5235a4aec5a0fbfdb9ff243fc388f4342d20ca
 Rect selection;
 RotatedRect trackBox;
 int vmin = 77;
@@ -104,7 +112,15 @@ GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar, ArServerBase* server){
 }
 void GotoGoal::init(int argc, char **argv){
 	myRobot->runAsync(true);
+<<<<<<< HEAD
 //	myRobot->comInt(ArCommands::ENABLE, 1);
+=======
+<<<<<<< HEAD
+	myRobot->moveTo(ArPose(0,0,0));
+=======
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
+	myRobot->comInt(ArCommands::ENABLE, 1);
+>>>>>>> 5d5235a4aec5a0fbfdb9ff243fc388f4342d20ca
 	myRobot->addRangeDevice(sonarDev);
 	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 400, 200, 100, 20);
 	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 20, true);
@@ -114,7 +130,10 @@ void GotoGoal::init(int argc, char **argv){
 	myRobot->addAction(&avoidFrontAction, 60);
 //	myRobot->addAction(&avoidSide, 50);
 	myRobot->addAction(&stallRecover, 70);
+<<<<<<< HEAD
+=======
 
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 	server->runAsync();
 //	myRobot->enableMotors();
 	myRobot->lock();
@@ -427,9 +446,15 @@ int main(int argc, char **argv) {
 	while(i < 25 && !findObject) {
 		gotoGoal.gotoGoal(poseList[i]);
 		timer.setToNow();
+<<<<<<< HEAD
+
+		while (!gotoGoal.haveAchievedGoal()) {
+
+=======
 		bool checkAchievedGoal = false;
 		while (!gotoGoal.haveAchievedGoal()) {
 			cout<<"x = "<<gotoGoal.getPose().getX()<<"\t y = "<<gotoGoal.getPose().getY()<<endl;
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 			if (timer.getMSec() > timeOut) {
 				gotoGoal.cancelGoal();
 				break;
@@ -466,12 +491,25 @@ int main(int argc, char **argv) {
 						}
 
 					}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+				} else {
+=======
+				} else if (turn == 0){
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
+					checkObject = false;
+					cout<< "Bat sai"<<endl;
+					gotoGoal.disableDirectionCommand();
+//					gotoGoal.cancelGoal();
+>>>>>>> 5d5235a4aec5a0fbfdb9ff243fc388f4342d20ca
 				}
 			} else {
 				cout <<"Goal("<<poseList[i].getX()<<", "<<poseList[i].getY()<<")"<<endl;
 				gotoGoal.disableDirectionCommand();
 				ArLog::log(ArLog::Normal, "Tim doi tuong");
 			}
+<<<<<<< HEAD
 			if(!showFrames())
 				break;
 		}
@@ -497,10 +535,29 @@ int main(int argc, char **argv) {
 				if (!showFrames())
 					break;
 			}
+=======
+<<<<<<< HEAD
+
+=======
+			/*
+			if (turn != 0) {
+				gotoGoal.rotate(myAngle * turn);
+				cout <<"Quay "<<turn * myAngle<<" do"<<endl;
+				turn++;
+			}
+			*/
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
+//			imshow("main", image);
+//			imshow( "threshold", mask );
+//			imshow( "Histogram", histimg );
+>>>>>>> 5d5235a4aec5a0fbfdb9ff243fc388f4342d20ca
 
 		}
 		i++;
+<<<<<<< HEAD
+=======
 		gotoGoal.disableDirectionCommand();
+>>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 	}
 	gotoGoal.shutdown();
 }
