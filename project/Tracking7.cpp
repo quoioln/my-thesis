@@ -40,6 +40,7 @@ int	smin = 130;
 
 //var check find ball
 bool checkObject = false;
+bool check = false;
 
 int findObject = 0;
 bool test;
@@ -102,9 +103,9 @@ void GotoGoal::init(int argc, char **argv){
 	myRobot->runAsync(true);
 //	myRobot->comInt(ArCommands::ENABLE, 1);
 	myRobot->addRangeDevice(sonarDev);
-	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 400, 200, 100, 20);
-	avoidFrontAction = ArActionAvoidFront("avoid front", 400, 200, 20, true);
-	stallRecover = ArActionStallRecover("stall recover", 300, 50, 200, 20, true);
+	gotoGoalAction = ArActionGoto("goto", ArPose(0, 0, 0), 1000, 200, 100, 20);
+	avoidFrontAction = ArActionAvoidFront("avoid front", 600, 200, 20, true);
+	stallRecover = ArActionStallRecover("stall recover", 400, 50, 200, 20, true);
 //	avoidSide = ArActionAvoidSide("", 200, 20);
 	myRobot->addAction(&gotoGoalAction, 50);
 	myRobot->addAction(&avoidFrontAction, 60);
@@ -271,7 +272,6 @@ bool trackObject(Mat hsv, Mat mask){
 	if (abs(width - height) >  delta || width < 30 || height < 30)
 		return false;
 	ellipse( image, trackBox, Scalar(0,0,255), 3, LINE_AA );
-	long  x = trackBox.center.x;
 	return true;
 };
 float distance()
@@ -291,7 +291,6 @@ float determindAngle(float x, float y) {
 }
 float determindRotate() {
 	long  x = trackBox.center.x;
-	long  y = trackBox.center.y;
 	if (x <= 200)
 		return (0 - 10);
 //		return -10;
@@ -423,11 +422,13 @@ int main(int argc, char **argv) {
 	int i = 0;
 
 	while(i < 25 ) {//&& !findObject) {
+
 		gotoGoal.gotoGoal(poseList[i]);
 		timer.setToNow();
 		bool checkAchievedGoal = false;
 		while (!gotoGoal.haveAchievedGoal()) {
-			cout<<"x = "<<gotoGoal.getPose().getX()<<"\t y = "<<gotoGoal.getPose().getY()<<endl;
+			check = false;
+//			cout<<"x = "<<gotoGoal.getPose().getX()<<"\t y = "<<gotoGoal.getPose().getY()<<endl;
 			if (timer.mSecSince() > timeOut) {
 				gotoGoal.cancelGoal();
 				break;
@@ -435,36 +436,44 @@ int main(int argc, char **argv) {
 			readFrame(cap);
 			if (!checkObject)
 				checkObject = detect(frame, c);
-			showFrames();
 
+			showFrames();
+			if (checkObject) {
+				cout <<"Phat hien doi tuong!!!!!!!!!!!!!!!"<<endl;
+				check = true;
+			}
+			gotoGoal.enableDirectionCommand();
+			while(checkObject) {
+				readFrame(cap);
+				follow(hsv, mask);
+				showFrames();
+			}
+
+			if (!checkObject && check){
+				cout <<"Bat dau quay!!!!!!!!!!!!!!!"<<endl;
+				int turn = 0;
 				gotoGoal.enableDirectionCommand();
-				while(checkObject) {
-					readFrame(cap);
-					follow(hsv, mask);
-					showFrames();
-				}
-//				if(checkObject) {
-					if (!checkObject){
-						int turn = 0;
-						gotoGoal.enableDirectionCommand();
-						while (turn < 17) {
-							turn ++;
-							gotoGoal.rotate(myAngle);
-							cout <<"Quay "<<turn * myAngle<<" do"<<endl;
-							gotoGoal.setVel(0);
-							while(!gotoGoal.haveRotated()) {
-								if (!readFrame(cap))
-									break;
-								if (!checkObject)
-									checkObject = detect(frame, c);
-								if (checkObject){
-									break;
-								}
-								showFrames();
-							}
+				bool checkRotate = false;
+				while (turn < 17 && !checkRotate) {//&& !check) {
+					turn ++;
+					gotoGoal.rotate(myAngle);
+					cout <<"Quay "<<turn * myAngle<<" do"<<endl;
+					gotoGoal.setVel(0);
+
+					while(!gotoGoal.haveRotated()) {
+						if (!readFrame(cap))
+							break;
+						if (!checkObject)
+							checkObject = detect(frame, c);
+						if (checkObject){
+							checkRotate = true;
+							break;
 						}
+						showFrames();
 					}
-//				}
+				}
+			}
+
 			gotoGoal.disableDirectionCommand();
 		}
 		cout <<"Da den muc tieu!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
@@ -483,6 +492,7 @@ int main(int argc, char **argv) {
 				if (!checkObject)
 					checkObject = detect(frame, c);
 				if (checkObject){
+					check = true;
 					break;
 				}
 			}

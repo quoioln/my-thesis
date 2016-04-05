@@ -25,11 +25,9 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.766270639" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1895100964" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/include/opencv2"/>
-									<listOptionValue builtIn="false" value="/usr/local/Arnl/include"/>
-									<listOptionValue builtIn="false" value="/usr/local/Arnl/include"/>
 									<listOptionValue builtIn="false" value="/usr/local/include/opencv"/>
-									<listOptionValue builtIn="false" value="/usr/local/Arnl/include/Aria"/>
-									<listOptionValue builtIn="false" value="/usr/local/Arnl/include/ArNetworking"/>
+									<listOptionValue builtIn="false" value="/usr/local/Aria/include"/>
+									<listOptionValue builtIn="false" value="/usr/local/Aria/ArNetworking/include"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.2130633302" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1905546204" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -37,19 +35,37 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1037701729" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.1242200867" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
 								<option id="gnu.c.compiler.exe.debug.option.debugging.level.327072466" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.51063183" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/local/Aria/include"/>
+									<listOptionValue builtIn="false" value="/usr/local/Aria/ArNetworking/include"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1793584672" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.772388231" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1716345605" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.paths.711887358" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/usr/local/Arnl/lib"/>
+									<listOptionValue builtIn="false" value="/usr/local/lib/"/>
 									<listOptionValue builtIn="false" value="/usr/local/Aria/lib"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.365169960" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="AriaForArnl"/>
-									<listOptionValue builtIn="false" value="Arnl"/>
-									<listOptionValue builtIn="false" value="BaseArnl"/>
-									<listOptionValue builtIn="false" value="ArNetworkingForArnl"/>
+									<listOptionValue builtIn="false" value="stdc++"/>
+									<listOptionValue builtIn="false" value="pthread"/>
+									<listOptionValue builtIn="false" value="dl"/>
+									<listOptionValue builtIn="false" value="rt"/>
+									<listOptionValue builtIn="false" value="Aria"/>
+									<listOptionValue builtIn="false" value="ArNetworking"/>
+									<listOptionValue builtIn="false" value="opencv_objdetect"/>
+									<listOptionValue builtIn="false" value="opencv_features2d"/>
+									<listOptionValue builtIn="false" value="opencv_highgui"/>
+									<listOptionValue builtIn="false" value="opencv_videoio"/>
+									<listOptionValue builtIn="false" value="opencv_imgcodecs"/>
+									<listOptionValue builtIn="false" value="opencv_video"/>
+									<listOptionValue builtIn="false" value="opencv_imgproc"/>
+									<listOptionValue builtIn="false" value="opencv_core"/>
+								</option>
+								<option id="gnu.cpp.link.option.other.63783863" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" valueType="stringList">
+									<listOptionValue builtIn="false" value="-Bdynamic"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.487966774" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

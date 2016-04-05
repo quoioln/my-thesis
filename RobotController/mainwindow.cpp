@@ -35,7 +35,7 @@ void MainWindow::getFile(ArNetPacket* packet) {
         }
     }
     ArTypes::UByte4 numBytes;
-    char buf[3200];
+    char buf[32000];
     //file should be good here, so just write into it
     numBytes = packet->bufToUByte4();
     if (numBytes == 0) {
@@ -50,7 +50,7 @@ void MainWindow::getFile(ArNetPacket* packet) {
 //    //    msg.setDetailedText("The details are as follows:");
 //        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 //        msg.exec();
-//        client->remHandler("getFile", &getFileCB);
+        client->remHandler("getFile", &getFileCB);
 //        writeImageDone = true;
         ArUtil::sleep(1000);
     } else {
@@ -65,11 +65,11 @@ void MainWindow::checkObject(ArNetPacket* packet) {
     stringstream content ;
     content << "Find object: " <<findObject;
     ui->lblFindObject->setText(QString(content.str().c_str()));
-    if (findObject && requestFile == true) {
-        client->addHandler("getFile", &getFileCB);
-        client->requestOnceWithString("getFile", "image/ball.jpg");
+    if (findObject) {
 
-        requestFile = true;
+        client->requestOnceWithString("getFile", "image/ball.jpg");
+//        ui->lblImage->setPixmap(QPixmap("ballDetect.jpg"));
+//        requestFile = true;
     }
 }
 void MainWindow::recievePose(ArNetPacket* packet) {
@@ -133,6 +133,8 @@ void MainWindow::on_btnConnectServer_clicked()
         client->runAsync();
         client->addHandler("handleCheckObjectData", &checkObjectCB);
         client->addHandler("handlePoseRobot", &recievePoseCB);
+//        client->addHandler("getFile", &getFileCB);
+
 //        client->addHandler("getFile", &getFileCB);
 //        while(client->getRunningWithLock()) {
             client->request("handlePoseRobot", 10);
