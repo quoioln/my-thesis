@@ -29,7 +29,7 @@ const float maxWidth = 640, maxHeight = 480, delta = 40;
 const float stopDistance = 250;
 const int lenght = 25;
 const int timeOut = 180000;
-const int myAngle = 45;
+const int myAngle = 20;
 
 Mat image, mask, hsv, frame;
 Rect selection;
@@ -174,8 +174,8 @@ ArPose GotoGoal::getPose(){
 	return myRobot->getPose();
 }
 void GotoGoal::shutdown(){
-	Aria::exit(0);
 	Aria::shutdown();
+	Aria::exit(0);
 };
 void GotoGoal::lock(){
 	myRobot->lock();
@@ -293,13 +293,13 @@ float determindRotate() {
 	long  x = trackBox.center.x;
 	long  y = trackBox.center.y;
 	if (x <= 200)
-		return (0 - determindAngle(x, y));
+		return (0 - 10);
 //		return -10;
 	else if (x <= 440)
 		return 0;
-	else
+//	else
 //		return 10;
-	return determindAngle(x, y);
+	return 10;
 }
 bool follow(Mat hsv, Mat mask) {
 	float vel = 0;
@@ -311,14 +311,11 @@ bool follow(Mat hsv, Mat mask) {
 			gotoGoal.setVel(20);
 			gotoGoal.move(d - 250);
 		} else if (d <= 300){
-			gotoGoal.stop();
+			gotoGoal.disableRobot();
 			findObject =  1;
-			
-//			gotoGoal.cancelGoal();
-//			break;
-				cout<<"save image";
-				imwrite("./image/ball.jpg", image);
-			return false;
+			cout<<"save image";
+			imwrite("./image/ball.jpg", image);
+//			return false;
 		} else {
 			vel = d * 0.7;
 			vel = (int) (vel/50) * 50;
@@ -428,41 +425,22 @@ int main(int argc, char **argv) {
 	while(i < 25 ) {//&& !findObject) {
 		gotoGoal.gotoGoal(poseList[i]);
 		timer.setToNow();
-
 		bool checkAchievedGoal = false;
 		while (!gotoGoal.haveAchievedGoal()) {
-			gotoGoal.lock();
-			cout <<"time = "<<timer.mSecSince()<<endl;
-			gotoGoal.unlock();
 			cout<<"x = "<<gotoGoal.getPose().getX()<<"\t y = "<<gotoGoal.getPose().getY()<<endl;
-
-			//if (timer.mSecSince() >= 10000)
-				//test = 1;
-			if (timer.getMSec() > timeOut) {
+			if (timer.mSecSince() > timeOut) {
 				gotoGoal.cancelGoal();
 				break;
 			}
-//			if (findObject == 1) {
-//				cout<<"save image";
-//				imwrite("./image/ball.jpg", image);
-//			}
-			if (!readFrame(cap))
-				break;
+			readFrame(cap);
 			if (!checkObject)
 				checkObject = detect(frame, c);
-			if (checkObject){
-				if(!follow(hsv, mask)) {
-					gotoGoal.cancelGoal();
-					break;
-				}
-//				if (findObject == 1) {
-//					cout<<"save image";
-//					imwrite("./image/ball.jpg", image);
-//				}
-				if (!checkObject) {
+			showFrames();
+			if(checkObject) {
+				if (!checkObject){
 					int turn = 0;
-
-					while (turn < 7) {
+					gotoGoal.enableDirectionCommand();
+					while (turn < 17) {
 						turn ++;
 						gotoGoal.rotate(myAngle);
 						cout <<"Quay "<<turn * myAngle<<" do"<<endl;
@@ -473,65 +451,51 @@ int main(int argc, char **argv) {
 							if (!checkObject)
 								checkObject = detect(frame, c);
 							if (checkObject){
-//								gotoGoal.disableDirectionCommand();
-								if (!follow(hsv, mask))
-									break;
-
-//								if (findObject == 1) {
-//									cout<<"save image";
-//									imwrite("./image/ball.jpg", image);
-//								}
-
-							}
-							if (!showFrames())
 								break;
+							}
+							showFrames();
 						}
-
 					}
 				}
-			} else {
-				cout <<"Goal("<<poseList[i].getX()<<", "<<poseList[i].getY()<<")"<<endl;
-				gotoGoal.disableDirectionCommand();
-				ArLog::log(ArLog::Normal, "Tim doi tuong");
+				gotoGoal.enableDirectionCommand();
+				while(checkObject) {
+					readFrame(cap);
+					follow(hsv, mask);
+					showFrames();
+				}
 			}
-			if(!showFrames())
-				break;
+			gotoGoal.disableDirectionCommand();
 		}
 		cout <<"Da den muc tieu!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 		gotoGoal.enableDirectionCommand();
 
 		int turn = 0;
 
-		while (turn < 7) {
-
-
+		while (turn < 17) {
 			turn ++;
 			gotoGoal.setVel(0);
 			gotoGoal.rotate(myAngle);
 			cout <<"Quay "<<turn * myAngle<<" do"<<endl;
 			while(!gotoGoal.haveRotated()) {
-
 				if (!readFrame(cap))
 					break;
 				if (!checkObject)
 					checkObject = detect(frame, c);
 				if (checkObject){
-//					gotoGoal.disableDirectionCommand();
-					if (!follow(hsv, mask))
 					break;
 				}
-//				if (findObject == 1) {
-//					cout<<"save image";
-//					imwrite("./image/ball.jpg", image);
-//				}
-				if (!showFrames())
-					break;
 			}
-
+		}
+		gotoGoal.enableDirectionCommand();
+		while(checkObject) {
+			readFrame(cap);
+			follow(hsv, mask);
+			showFrames();
 		}
 		i++;
 		gotoGoal.disableDirectionCommand();
 	}
+	robot.waitForRunExit(0);
 	gotoGoal.shutdown();
 }
 

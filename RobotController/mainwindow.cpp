@@ -8,10 +8,14 @@
 using namespace std;
 
 double findObject = 0;
+bool requestFile = false;
+bool writeImageDone = false;
 FILE *file = NULL;
 //ArClientBase client;
 
 void MainWindow::enable(ArNetPacket* packet) {
+}
+void MainWindow::disable(ArNetPacket* packet) {
 }
 void MainWindow::getFile(ArNetPacket* packet) {
     cout <<"get file is called";
@@ -31,16 +35,25 @@ void MainWindow::getFile(ArNetPacket* packet) {
         }
     }
     ArTypes::UByte4 numBytes;
-    char buf[32000];
+    char buf[3200];
     //file should be good here, so just write into it
     numBytes = packet->bufToUByte4();
     if (numBytes == 0) {
         printf("Got all of file %s\n", fileName);
         fclose(file);
         ui->lblImage->setPixmap(QPixmap("ballDetect.jpg"));
+//        QMessageBox msg;
+//        msg.setIconPixmap(QPixmap("ballDetect.jpg"));
+//        //msg.setIcon(QMessageBox::Information);
+//        msg.setInformativeText("Co dung la qua qua bong");
+//        msg.setWindowTitle("Xac nhan");
+//    //    msg.setDetailedText("The details are as follows:");
+//        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+//        msg.exec();
+//        client->remHandler("getFile", &getFileCB);
+//        writeImageDone = true;
         ArUtil::sleep(1000);
-    }
-    else {
+    } else {
         printf("Got %d bytes of file %s\n", numBytes, fileName);
         packet->bufToData(buf, numBytes);
         fwrite(buf, 1, numBytes, file);
@@ -52,11 +65,12 @@ void MainWindow::checkObject(ArNetPacket* packet) {
     stringstream content ;
     content << "Find object: " <<findObject;
     ui->lblFindObject->setText(QString(content.str().c_str()));
-    if (findObject) {
+    if (findObject && requestFile == true) {
         client->addHandler("getFile", &getFileCB);
         client->requestOnceWithString("getFile", "image/ball.jpg");
+
+        requestFile = true;
     }
-    //if (f)
 }
 void MainWindow::recievePose(ArNetPacket* packet) {
     double x = packet->bufToDouble();
@@ -80,9 +94,9 @@ ArGlobalFunctor1<ArNetPacket*> checkObjectCB(&checkObject);
 */
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow), enableCB(this, &MainWindow::enable), getFileCB(this, &MainWindow::getFile),
+    ui(new Ui::MainWindow), enableCB(this, &MainWindow::enable), disableCB(this, &MainWindow::disable),
+    getFileCB(this, &MainWindow::getFile),
     checkObjectCB(this, &MainWindow::checkObject), recievePoseCB(this, &MainWindow::recievePose),
-//    disableCB(this, &MainWindow::disable),
     client(new ArClientBase())
 {
     ui->setupUi(this);
@@ -119,6 +133,7 @@ void MainWindow::on_btnConnectServer_clicked()
         client->runAsync();
         client->addHandler("handleCheckObjectData", &checkObjectCB);
         client->addHandler("handlePoseRobot", &recievePoseCB);
+//        client->addHandler("getFile", &getFileCB);
 //        while(client->getRunningWithLock()) {
             client->request("handlePoseRobot", 10);
             client->request("handleCheckObjectData", 10);

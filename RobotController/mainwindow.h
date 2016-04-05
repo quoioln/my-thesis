@@ -33,7 +33,7 @@ private:
     ArFunctor1C<MainWindow, ArNetPacket *> disableCB;
 
     void enable(ArNetPacket* packet);
-//    void disable(ArNetPacket* packet);
+    void disable(ArNetPacket* packet);
     void getFile(ArNetPacket* packet);
     void checkObject(ArNetPacket* packet);
     void recievePose(ArNetPacket* packet);
