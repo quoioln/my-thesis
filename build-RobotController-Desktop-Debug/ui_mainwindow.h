@@ -36,12 +36,14 @@ public:
     QLabel *lblFindObject;
     QLabel *lblPose;
     QLabel *lblImage;
+    QPushButton *btnTrue;
+    QPushButton *btnFalse;
 
     void setupUi(QMainWindow *MainWindow)
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(1366, 768);
+        MainWindow->resize(793, 526);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         groupButton = new QGroupBox(centralWidget);
@@ -67,10 +69,18 @@ public:
         lblFindObject->setGeometry(QRect(140, 320, 231, 17));
         lblPose = new QLabel(centralWidget);
         lblPose->setObjectName(QStringLiteral("lblPose"));
-        lblPose->setGeometry(QRect(140, 280, 121, 17));
+        lblPose->setGeometry(QRect(20, 280, 241, 20));
         lblImage = new QLabel(centralWidget);
         lblImage->setObjectName(QStringLiteral("lblImage"));
         lblImage->setGeometry(QRect(310, 100, 391, 371));
+        btnTrue = new QPushButton(centralWidget);
+        btnTrue->setObjectName(QStringLiteral("btnTrue"));
+        btnTrue->setEnabled(false);
+        btnTrue->setGeometry(QRect(288, 490, 131, 27));
+        btnFalse = new QPushButton(centralWidget);
+        btnFalse->setObjectName(QStringLiteral("btnFalse"));
+        btnFalse->setEnabled(false);
+        btnFalse->setGeometry(QRect(460, 490, 111, 27));
         MainWindow->setCentralWidget(centralWidget);
 
         retranslateUi(MainWindow);
@@ -89,6 +99,8 @@ public:
         lblFindObject->setText(QApplication::translate("MainWindow", "find object", 0));
         lblPose->setText(QApplication::translate("MainWindow", "Vi tri:", 0));
         lblImage->setText(QApplication::translate("MainWindow", "Anh", 0));
+        btnTrue->setText(QApplication::translate("MainWindow", "\304\220\303\272ng \304\221\341\273\221i t\306\260\341\273\243ng", 0));
+        btnFalse->setText(QApplication::translate("MainWindow", "Sai \304\221\341\273\221i t\306\260\341\273\243ng", 0));
     } // retranslateUi
 
 };

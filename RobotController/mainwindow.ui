@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1366</width>
-    <height>768</height>
+    <width>793</width>
+    <height>526</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,10 +105,10 @@
    <widget class="QLabel" name="lblPose">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>20</x>
       <y>280</y>
-      <width>121</width>
-      <height>17</height>
+      <width>241</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
@@ -126,6 +126,38 @@
     </property>
     <property name="text">
      <string>Anh</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnTrue">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>288</x>
+      <y>490</y>
+      <width>131</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Đúng đối tượng</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnFalse">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>490</y>
+      <width>111</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Sai đối tượng</string>
     </property>
    </widget>
   </widget>

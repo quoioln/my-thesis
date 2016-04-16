@@ -109,13 +109,9 @@ void netGetFile(ArNetPacket *packet)
 }
 
 void recieveData(ArNetPacket* packet) {
+	checkObject = packet->bufToDouble();
 }
 void enable(ArNetPacket* packet) {
-	double sinal = packet->bufToDouble();
-	cout <<"recieve "<<sinal<<endl;
-	if (sinal == 1) {
-		gotoGoal.enableRobot();
-	}
 }
 
 int main(int argc, char **argv)
@@ -164,10 +160,11 @@ int main(int argc, char **argv)
   ArGlobalFunctor1<ArNetPacket*> recieveDataCB(&recieveData);
 
   client.addHandler("requestEnableMotor", &enableCB);
-  client.addHandler("sendData", &recieveDataCB);
+  client.addHandler("handleCheckObjectData", &recieveDataCB);
   //client.addHandler("getFile", &getFileCB);
 
   client.requestOnce("requestEnableMotor");
+  client.request("handleCheckObjectData", 10);
   updates.requestUpdates();
   if (checkObject)
 	client.requestOnceWithString("getFile", "./image/ball.jpg");
@@ -176,7 +173,7 @@ int main(int argc, char **argv)
   while (client.getRunningWithLock())
   {
 
-	  client.requestOnce("sendData");
+	  //client.requestOnce("sendData");
 
 	  if (checkObject) {
 	//	  if (!a) {
@@ -185,7 +182,7 @@ int main(int argc, char **argv)
 			  client.addHandler("getFile", &getFileCB);
 //			  client.remHandler("getFile", &getFileCB);
 		  //}	else {
-			  client.remHandler("getFile", &getFileCB);
+			  //client.remHandler("getFile", &getFileCB);
 		  //}
 		  Mat image;
 		  image = imread("./image/ball.jpg", CV_LOAD_IMAGE_COLOR);
@@ -195,22 +192,15 @@ int main(int argc, char **argv)
 		  if( c == 27 )
 			break;
 	  }
-	  /*
-	  if (client.dataExists("testFunctor")) {
-		  cout <<"Test OK";
-	  }
-	  */
+
     ArUtil::sleep(200);
   }
-<<<<<<< HEAD
+
 //  client.requestStop("getFile");
-=======
-<<<<<<< HEAD
+
   cout <<"Da tim thay qua bong o vi tri pose("<<pose.getX()<<", "<<pose.getY()<<")"<<endl;
-=======
->>>>>>> 5d5235a4aec5a0fbfdb9ff243fc388f4342d20ca
+
   cout <<"Vi tri pose("<<pose.getX()<<", "<<pose.getY()<<")"<<endl;
->>>>>>> 3b7a910d54f50dff2242d076b64b9012cd742ba3
 
   /* The client stopped running, due to disconnection from the server, general
    * Aria shutdown, or some other reason. */

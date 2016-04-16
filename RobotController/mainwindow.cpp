@@ -5,12 +5,16 @@
 #include "ArNetworking.h"
 #include "iostream"
 #include "sstream"
+#include "pthread.h"
 using namespace std;
 
 double findObject = 0;
-bool requestFile = false;
+int count = 0;
+bool a = false;
+bool b = false;
 bool writeImageDone = false;
 FILE *file = NULL;
+int confirm = -1;
 //ArClientBase client;
 
 void MainWindow::enable(ArNetPacket* packet) {
@@ -18,7 +22,7 @@ void MainWindow::enable(ArNetPacket* packet) {
 void MainWindow::disable(ArNetPacket* packet) {
 }
 void MainWindow::getFile(ArNetPacket* packet) {
-    cout <<"get file is called";
+    //cout <<"get file is called\n";
     int ret;
     char fileName[2048];
     ret = packet->bufToUByte2();
@@ -41,35 +45,34 @@ void MainWindow::getFile(ArNetPacket* packet) {
     if (numBytes == 0) {
         printf("Got all of file %s\n", fileName);
         fclose(file);
-        ui->lblImage->setPixmap(QPixmap("ballDetect.jpg"));
-//        QMessageBox msg;
-//        msg.setIconPixmap(QPixmap("ballDetect.jpg"));
-//        //msg.setIcon(QMessageBox::Information);
-//        msg.setInformativeText("Co dung la qua qua bong");
-//        msg.setWindowTitle("Xac nhan");
-//    //    msg.setDetailedText("The details are as follows:");
-//        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-//        msg.exec();
-        client->remHandler("getFile", &getFileCB);
-//        writeImageDone = true;
-        ArUtil::sleep(1000);
+        client->remHandler("getFile",&getFileCB);
+        writeImageDone = true;
     } else {
         printf("Got %d bytes of file %s\n", numBytes, fileName);
         packet->bufToData(buf, numBytes);
         fwrite(buf, 1, numBytes, file);
     }
 }
+
 void MainWindow::checkObject(ArNetPacket* packet) {
     findObject = packet->bufToDouble();
-//    cout << "reviece: "<<findObject<<endl;
     stringstream content ;
     content << "Find object: " <<findObject;
     ui->lblFindObject->setText(QString(content.str().c_str()));
     if (findObject) {
-
-        client->requestOnceWithString("getFile", "image/ball.jpg");
-//        ui->lblImage->setPixmap(QPixmap("ballDetect.jpg"));
-//        requestFile = true;
+        if(!a){
+            client->addHandler("getFile", &getFileCB);
+            client->requestOnceWithString("getFile", "image/ball.jpg");
+            a = true;
+        }
+        if (writeImageDone) {
+            ui->btnFalse->setEnabled(true);
+            ui->btnTrue->setEnabled(true);
+            QPixmap ball("ballDetect.jpg");
+            ball.setDevicePixelRatio(2);
+            ui->lblImage->setPixmap(ball);
+            ArUtil::sleep(1000);
+        }
     }
 }
 void MainWindow::recievePose(ArNetPacket* packet) {
@@ -79,19 +82,13 @@ void MainWindow::recievePose(ArNetPacket* packet) {
     content<<"x = "<<x<<"  y = "<<y;
 
     ui->lblPose->setText(content.str().c_str());
-//    char* buff = new char[100];
-//    packet->bufToStr(buff, 100);
-//    ui->lblPose->setText(buff);
+
 }
 
 bool MainWindow::connectServer(char* hostName, int port) {
     return client->blockingConnect(hostName, 7272);
 }
-/*
-ArGlobalFunctor1<ArNetPacket*> enanleCB(&enable);
-ArGlobalFunctor1<ArNetPacket*> getFileCB(&getFile);
-ArGlobalFunctor1<ArNetPacket*> checkObjectCB(&checkObject);
-*/
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow), enableCB(this, &MainWindow::enable), disableCB(this, &MainWindow::disable),
@@ -100,6 +97,7 @@ MainWindow::MainWindow(QWidget *parent) :
     client(new ArClientBase())
 {
     ui->setupUi(this);
+
     Aria::init();
 }
 
@@ -133,15 +131,13 @@ void MainWindow::on_btnConnectServer_clicked()
         client->runAsync();
         client->addHandler("handleCheckObjectData", &checkObjectCB);
         client->addHandler("handlePoseRobot", &recievePoseCB);
-//        client->addHandler("getFile", &getFileCB);
+        client->addHandler("enable", &enableCB);
 
-//        client->addHandler("getFile", &getFileCB);
-//        while(client->getRunningWithLock()) {
-            client->request("handlePoseRobot", 10);
-            client->request("handleCheckObjectData", 10);
-
-//        }
-
+        client->request("handlePoseRobot", 10);
+        client->request("handleCheckObjectData", 10);
+        client->requestOnceWithString("getFile", "image/ball.jpg");
+        a = false;
+//        client->runAsync();
     } else {
         QMessageBox::information(this, "Thong bao", "Ket noi den server that bai");
     }
@@ -150,20 +146,14 @@ void MainWindow::on_btnConnectServer_clicked()
 
 void MainWindow::on_btnEnableMotor_clicked()
 {
-    client->addHandler("requestEnableMotor", &enableCB);
-//    ArNetPacket dataRequest;
-//    dataRequest.doubleToBuf(1);
-    client->requestOnce("requestEnableMotor");
-//    ArNetPacket packet;
-//    packet.doubleToBuf(1);
-//    packet.byteToBuf(1);
-//    pa
-//    client->requestOnceByCommand(ArCommands::ENABLE, &packet);
-//    client->requestOnce("enableMotor", &packet);
+    ArNetPacket packet ;
+    packet.doubleToBuf(1);
+    client->requestOnce("enable", &packet);
 }
 
 void MainWindow::on_btnStop_clicked()
 {
-    client->addHandler("requestDisableMotor", &disableCB);
-    client->requestOnce("requestDisableMotor");
+    ArNetPacket packet;
+    packet.doubleToBuf(0);
+    client->requestOnce("enable", &packet);
 }

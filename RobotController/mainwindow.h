@@ -31,7 +31,10 @@ private:
     ArFunctor1C<MainWindow, ArNetPacket *> checkObjectCB;
     ArFunctor1C<MainWindow, ArNetPacket *> recievePoseCB;
     ArFunctor1C<MainWindow, ArNetPacket *> disableCB;
+    //ArFunctor1C<MainWindow, int> fileReceivedCB;
+//    ArClientFileToClient *fileToClient;
 
+//    void fileReceived(int ret);
     void enable(ArNetPacket* packet);
     void disable(ArNetPacket* packet);
     void getFile(ArNetPacket* packet);

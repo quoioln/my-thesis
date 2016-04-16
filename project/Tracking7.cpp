@@ -34,6 +34,8 @@ const int myAngle = 20;
 Mat image, mask, hsv, frame;
 Rect selection;
 RotatedRect trackBox;
+
+ArTime timeTracking;
 int vmin = 77;
 int	vmax = 256;
 int	smin = 130;
@@ -61,15 +63,30 @@ void sendData(ArServerClient* client, ArNetPacket*) {
 	reply.doubleToBuf(findObject);
     client->sendPacketUdp(&reply);
 }
-
-void sendPoseRobot(ArServerClient* client, ArNetPacket*) {
+void enable(ArServerClient* client, ArNetPacket* packet)
+{
+	double check = packet->bufToDouble();
+	if (check) {
+		gotoGoal.enableRobot();
+		gotoGoal.disableDirectionCommand();
+	} else {
+		gotoGoal.disableRobot();
+	}
+}
+void confirmObject(ArServerClient* client, ArNetPacket* packet)
+{
+	double check = packet->bufToDouble();
+	if (check) {
+		Aria::exit(0);
+	} else {
+		findObject = 0;
+	}
+}
+void sendPoseRobot(ArServerClient* client, ArNetPacket* packet) {
 	ArNetPacket reply;
 	ArPose pose = gotoGoal.getPose();
 	reply.doubleToBuf(pose.getX());
 	reply.doubleToBuf(pose.getY());
-//	stringstream content;
-//	content<<"x = "<<pose.getX()<<"  y = "<<pose.getY();
-//	cout <<"x = "<<pose.getX()<<"\ty = "<<pose.getY()<<endl;
     client->sendPacketUdp(&reply);
 }
 
@@ -91,13 +108,15 @@ GotoGoal::GotoGoal(ArRobot* robot, ArSonarDevice* sonar, ArServerBase* server, A
 	this->serverSimpleComUC = new ArServerSimpleComUC(this->serverHanlerCommands, this->myRobot);
 	this->serverFileToClient = serverFileToClient;//ArServerFileToClient(this->server, ".");
 	ArNetPacket packet;
-	this->serverHanlerCommands->addCommand("requestEnableMotor", "request enable motor", new ArGlobalFunctor1<ArNetPacket *>(&activeMotor));
-	this->serverHanlerCommands->addCommand("requestDisableMotor", "request disable motor", new ArGlobalFunctor1<ArNetPacket *>(&deactiveRobot));
+	//this->serverHanlerCommands->addCommand("requestEnableMotor", "request enable motor", new ArGlobalFunctor1<ArNetPacket *>(&activeMotor));
+	//this->serverHanlerCommands->addCommand("requestDisableMotor", "request disable motor", new ArGlobalFunctor1<ArNetPacket *>(&deactiveRobot));
 //	this->serverHanlerCommands->addCommand("test", "test", new ArGlobalFunctor2<ArServerClient*, ArNetPacket*>(&test));
 	this->server->addData("handleCheckObjectData", "some wierd test", new ArGlobalFunctor2<ArServerClient*, ArNetPacket*>(&sendData), "none", "none");
 	this->server->addData("handlePoseRobot", "pose robot", new ArGlobalFunctor2<ArServerClient*, ArNetPacket*>(&sendPoseRobot), "none", "none");
-	this->server->broadcastPacketTcp(&packet, "handleCheckObjectData");
-	this->server->broadcastPacketTcp(&packet, "handlePoseRobot");
+	this->server->addData("enable", "pose robot", new ArGlobalFunctor2<ArServerClient*, ArNetPacket*>(&enable), "none", "none");
+	
+	//this->server->broadcastPacketTcp(&packet, "handleCheckObjectData");
+	//this->server->broadcastPacketTcp(&packet, "handlePoseRobot");
 }
 void GotoGoal::init(int argc, char **argv){
 	myRobot->runAsync(true);
@@ -172,7 +191,10 @@ void GotoGoal::disableDirectionCommand(){
 
 };
 ArPose GotoGoal::getPose(){
-	return myRobot->getPose();
+	myRobot->lock();
+	ArPose pose = myRobot->getPose();
+	myRobot->unlock();
+	return pose;
 }
 void GotoGoal::shutdown(){
 	Aria::shutdown();
@@ -201,7 +223,7 @@ ArPose* readPostitions(char* fileName){
 	int i = 0;
 	while (!is.eof()) {
 		is >>line;
-		if (check) {
+		if (!check) {
 
 			pose.setX(atoi(line));
 			check = false;
@@ -221,16 +243,23 @@ bool detect(Mat frame, CascadeClassifier cascade) {
 	int sizeball = ball.size();
 	if (sizeball != 1)
 		 return false;
-	 vector<Rect>::const_iterator r = ball.begin();
-	 if (abs((float)r->width - (float)r->height) > delta || r->width < 30 || r->height < 30)
+//	 vector<Rect>::const_iterator r = ball.begin();
+	Rect r = ball[0];
+//	r.
+	 if (abs((float)r.width - (float)r.height) > delta || r.width < 60 || r.height < 60)
 		 return false;
-	 selection.x = r->x;
-	 selection.y = r->y;
-	 selection.width = r->x + (int)r->width;
-	 selection.height = r->y + (int)r->height;
+//	 CV_RGB(255, 0, 0);
+//	 cout << "Phat hien doi tuong !!! haarlike!!!!!!!!!!!"<<endl;
+	 /*
+	 selection.x = r.x;
+	 selection.y = r.y;
+	 selection.width = r.x + (int)r.width;
+	 selection.height = r.y + (int)r.height;
 	 selection &= Rect(0, 0, image.cols, image.rows);
-	 Point center( r->x + r->width/2, r->y + r->height/2 );
-	 ellipse( frame, center, Size( r->width/2, r->height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
+	 Point center( r.x + r.width/2, r.y + r.height/2 );
+	 */
+	 selection = r;
+//	 ellipse( frame, center, Size( r->width/2, r->height/2 ), 0, 0, 360, Scalar( 255, 0, 255 ), 4, 8, 0 );
 	 return true;
 }
 bool trackObject(Mat hsv, Mat mask){
@@ -269,7 +298,7 @@ bool trackObject(Mat hsv, Mat mask){
 	TermCriteria( TermCriteria::EPS | TermCriteria::COUNT, 10, 1 ));
 	float width = trackBox.size.width;
 	float height = trackBox.size.height;
-	if (abs(width - height) >  delta || width < 30 || height < 30)
+	if (abs(width - height) > delta || width < 10 || height < 10)
 		return false;
 	ellipse( image, trackBox, Scalar(0,0,255), 3, LINE_AA );
 	return true;
@@ -291,19 +320,19 @@ float determindAngle(float x, float y) {
 }
 float determindRotate() {
 	long  x = trackBox.center.x;
-	if (x <= 200)
+	if (x <= 250)
 		return (0 - 10);
 //		return -10;
-	else if (x <= 440)
+	else if (x <= 390)
 		return 0;
-//	else
-//		return 10;
-	return 10;
+	else
+		return 10;
 }
 bool follow(Mat hsv, Mat mask) {
 	float vel = 0;
 	float angle = 0;
 	gotoGoal.enableDirectionCommand();
+	
 	if(trackObject(hsv, mask)) {
 		float d = distance();
 		if (d <= 250) {
@@ -311,22 +340,23 @@ bool follow(Mat hsv, Mat mask) {
 			gotoGoal.move(d - 250);
 		} else if (d <= 300){
 			gotoGoal.disableRobot();
-			findObject =  1;
+			
 			cout<<"save image";
 			imwrite("./image/ball.jpg", image);
+			findObject =  1;
 //			return false;
 		} else {
-			vel = d * 0.7;
+			vel = d * 0.5;
 			vel = (int) (vel/50) * 50;
 			if (vel > 200)
-				vel = 200;
+				vel = 100;
 			gotoGoal.setVel(vel);
 			gotoGoal.move(d - 250);
 //						gotoGoal.move(20);
 		}
 		angle =  determindRotate();
 
-		cout<<"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
+		//cout<<"khoang cach: "<<d<<"\tGoc quay: "<<angle<<"\t van toc = "<<vel<<endl;
 		if (angle != 0) {
 			gotoGoal.rotate(angle);
 		}
@@ -413,7 +443,7 @@ int main(int argc, char **argv) {
 	int hsize = 16;
 	showWindows();
 	CascadeClassifier c;
-	c.load("cascade.xml");
+	c.load("cascade19.xml");
 	Mat hue, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
 	float vel = 0;
 	ArPose* poseList = readPostitions("positions.txt");
@@ -441,6 +471,7 @@ int main(int argc, char **argv) {
 			if (checkObject) {
 				cout <<"Phat hien doi tuong!!!!!!!!!!!!!!!"<<endl;
 				check = true;
+				timeTracking.setToNow();
 			}
 			gotoGoal.enableDirectionCommand();
 			while(checkObject) {
@@ -449,12 +480,12 @@ int main(int argc, char **argv) {
 				showFrames();
 			}
 
-			if (!checkObject && check){
+			if (!checkObject && check && timeTracking.mSecSince() > 100){
 				cout <<"Bat dau quay!!!!!!!!!!!!!!!"<<endl;
 				int turn = 0;
 				gotoGoal.enableDirectionCommand();
 				bool checkRotate = false;
-				while (turn < 17 && !checkRotate) {//&& !check) {
+				while (turn < 17 && !checkRotate ) {//&& !check) {
 					turn ++;
 					gotoGoal.rotate(myAngle);
 					cout <<"Quay "<<turn * myAngle<<" do"<<endl;
